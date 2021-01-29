@@ -123,7 +123,7 @@ class _EmpOrAdminState extends State<EmpOrAdmin> {
               ),
               SizedBox(height: 10.0.h,),
               roundButton(title: "Company or Admin",onTap: (){
-                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                Navigator.of(context).push(MaterialPageRoute(
                     builder: (BuildContext context) => LoginScreen(userType: 0,)));
               }),
               SizedBox(height: 20,),
@@ -132,7 +132,7 @@ class _EmpOrAdminState extends State<EmpOrAdmin> {
               ),
               SizedBox(height: 20,),
               roundButton(title: "Employee or Contractor",onTap: (){
-                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                Navigator.of(context).push(MaterialPageRoute(
                     builder: (BuildContext context) => LoginScreen(userType: 2,)));
               }),
             ],

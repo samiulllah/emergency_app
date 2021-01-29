@@ -10,11 +10,13 @@ class LoginScreen extends StatefulWidget {
   int userType;
   LoginScreen({this.userType});
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _LoginScreenState createState() => _LoginScreenState(userType: userType);
 }
 
 class _LoginScreenState extends State<LoginScreen> {
   int userType;
+  TextEditingController email=new TextEditingController();
+  TextEditingController password=new TextEditingController();
 
   _LoginScreenState({this.userType});
   @override
@@ -33,40 +35,52 @@ class _LoginScreenState extends State<LoginScreen> {
                    style: GoogleFonts.lato(fontSize: 24,fontWeight: FontWeight.bold,letterSpacing: .5,color: Colors.white),
                  ),
                  SizedBox(height: 10.0.h),
-                 Container(
-                   width: 100.0.w,
-                   padding: EdgeInsets.only(left: 20,right: 20),
-                   child: TextField(
-                     decoration: new InputDecoration(
-                         border: new OutlineInputBorder(
-                           borderRadius: const BorderRadius.all(
-                             const Radius.circular(25.0),
+                 Center(
+                   child: Container(
+                     width: 90.0.w,
+                     height: 7.0.h,
+                     alignment: Alignment.center,
+                     padding: EdgeInsets.only(left: 20,right: 20),
+                     child: TextField(
+                       controller: email,
+                       textAlignVertical: TextAlignVertical.center,
+                       textAlign: TextAlign.left,
+                       keyboardType: TextInputType.emailAddress,
+                       decoration: new InputDecoration(
+                           border: new OutlineInputBorder(
+                             borderRadius: const BorderRadius.all(
+                               const Radius.circular(25.0),
+                             ),
+                              borderSide:  BorderSide(color:Constants.secondary)
                            ),
-                            borderSide:  BorderSide(color:Constants.secondary)
-                         ),
-                         filled: true,
-                         hintStyle: new TextStyle(color: Colors.grey[800]),
-                         hintText: " Enter email",
-                         fillColor: Colors.white
+                           filled: true,
+                           hintStyle: new TextStyle(color: Colors.grey[800]),
+                           hintText: " Enter email",
+                           fillColor: Colors.white
+                       ),
                      ),
                    ),
                  ),
                  SizedBox(height: 5.0.h,),
-                 Container(
-                   width: 100.0.w,
-                   padding: EdgeInsets.only(left: 20,right: 20),
-                   child: TextField(
-                     obscureText: true,
-                     decoration: new InputDecoration(
-                         border: new OutlineInputBorder(
-                           borderRadius: const BorderRadius.all(
-                             const Radius.circular(25.0),
+                 Center(
+                   child: Container(
+                     width: 90.0.w,
+                     height: 7.0.h,
+                     padding: EdgeInsets.only(left: 20,right: 20),
+                     child: TextField(
+                       controller: password,
+                       obscureText: true,
+                       decoration: new InputDecoration(
+                           border: new OutlineInputBorder(
+                             borderRadius: const BorderRadius.all(
+                               const Radius.circular(25.0),
+                             ),
+                             borderSide:  BorderSide(color:Constants.secondary)
                            ),
-                           borderSide:  BorderSide(color:Constants.secondary)
-                         ),
-                         filled: true,
-                         hintText: " Enter password",
-                         fillColor: Colors.white),
+                           filled: true,
+                           hintText: " Enter password",
+                           fillColor: Colors.white),
+                     ),
                    ),
                  ),
                  SizedBox(height: 5.0.h,),
@@ -78,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                    borderSide: BorderSide(color: Colors.white, width: 2,
                        style: BorderStyle.solid),
                    child: SizedBox(
-                       width: 60.0.w,
+                       width: 40.0.w,
                        height: 6.5.h,
                        child: Center(child: Text("Submit",style: GoogleFonts.breeSerif(fontSize: 14.0.sp,letterSpacing: .5,color: Colors.white),))
                    ),
@@ -99,6 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigator.of(context).push(MaterialPageRoute(
                               builder: (BuildContext context) => EmployeeRegistration()));
                         }
+                        print('value of user type = $userType');
                      },
                      child: Text("Doesn't have account? Register",style: GoogleFonts.lato(color: Colors.white,fontSize: 16),)
                  )
