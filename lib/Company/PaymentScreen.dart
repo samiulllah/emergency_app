@@ -1,11 +1,14 @@
-import 'package:emergency_app/Company/Home.dart';
-import 'package:emergency_app/Company/Main.dart';
+import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:emergency_app/Constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_credit_card/credit_card_form.dart';
 import 'package:flutter_credit_card/credit_card_model.dart';
 import 'package:flutter_credit_card/credit_card_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+
+import 'Main.dart';
 
 class PaymentScreen extends StatefulWidget {
   @override
@@ -20,9 +23,27 @@ class _PaymentScreenState extends State<PaymentScreen> {
   bool isCvvFocused = false;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
+
+  void initState() {
+    super.initState();
+
+    BackButtonInterceptor.add(myInterceptor);
+  }
+
+  @override
+  void dispose() {
+    BackButtonInterceptor.remove(myInterceptor);
+    super.dispose();
+  }
+  bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info)  {
+    showMessage(context);
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
            brightness: Brightness.light,
@@ -96,6 +117,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           } else {
                             print('invalid!');
                           }
+
                           Navigator.of(context).pushReplacement(MaterialPageRoute(
                               builder: (BuildContext context) => CompanyMain()));
                         },
@@ -119,5 +141,39 @@ class _PaymentScreenState extends State<PaymentScreen> {
       cvvCode = creditCardModel.cvvCode;
       isCvvFocused = creditCardModel.isCvvFocused;
     });
+  }
+
+  void showMessage(BuildContext context){
+    Alert(
+      context: context,
+      type: AlertType.info,
+      title: "Do you want to quit",
+      desc: "You can complete remaining registration anytime",
+      buttons: [
+        DialogButton(
+          child: Text(
+            "Quit",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          onPressed:(){
+            Future.delayed(const Duration(milliseconds: 1000), () {
+              SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+            });
+            Navigator.pop(context);
+          },
+          color: Constants.primary,
+          radius: BorderRadius.circular(10.0),
+        ),
+        DialogButton(
+          child: Text(
+            "No",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          onPressed: () => Navigator.pop(context),
+          color: Constants.secondary,
+          radius: BorderRadius.circular(10.0),
+        )
+      ],
+    ).show();
   }
 }

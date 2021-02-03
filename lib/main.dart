@@ -4,14 +4,21 @@ import 'package:emergency_app/Company/Home.dart';
 import 'package:emergency_app/Constants.dart';
 import 'package:emergency_app/Employee/Home.dart';
 import 'package:emergency_app/LoginScreen.dart';
+import 'package:emergency_app/Providers/SharedPref.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sizer/sizer.dart';
-void main() {
+
+import 'Company/Main.dart';
+import 'Company/PaymentScreen.dart';
+Future<void> main() async {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
   ));
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -45,20 +52,32 @@ class _FlashScreenState extends State<FlashScreen> {
   void initState() {
     SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
     Timer( Duration(seconds: 6),
-            () {
-          bool login=false;
-          if(login) {
-            int userType = 0; // 0 for company 1 for administrator 2 for employee
+            () async{
+        // bool v=false;
+          SharedPref sharedPref=new SharedPref();
+         Map<String,dynamic> user=await sharedPref.read("user");
+         // await sharedPref.remove("user");
+          if(user!=null) {
+            int userType = int.parse(user["type"]); // 0 for company 1 for employee
             // check if current user logged in nav to home
             // check user type and navigate appropriately
-            if (userType == 1) {
-              Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (BuildContext context) => CompanyHome()));
+            if (userType == 0) {
+              if(user['isPayed']=="1"){
+                // navigate admin to home
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (BuildContext context) => CompanyMain()));
+              }
+              else{
+                // navigate admin to payment screen
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (BuildContext context) => PaymentScreen()));
+              }
             }
             else {
               Navigator.of(context).pushReplacement(MaterialPageRoute(
                   builder: (BuildContext context) => EmployeeHome()));
             }
+
           }
           else {
             //not login nav to continue as company, administrator or employee.
@@ -113,6 +132,7 @@ class _EmpOrAdminState extends State<EmpOrAdmin> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: Constants.primary,
         body: Column(

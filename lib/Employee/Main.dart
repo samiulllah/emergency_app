@@ -1,38 +1,32 @@
-import 'package:emergency_app/Company/QrCode.dart';
-import 'package:emergency_app/Company/Employees.dart';
-import 'package:emergency_app/Company/Home.dart';
-import 'package:emergency_app/Company/Profile.dart';
-import 'package:emergency_app/Company/Setting.dart';
 import 'package:emergency_app/Constants.dart';
+import 'package:emergency_app/Employee/Home.dart';
+import 'package:emergency_app/Employee/Profile.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
-
-class CompanyMain extends StatefulWidget {
+class EmployeeMain extends StatefulWidget {
   @override
-  _CompanyMainHomeState createState() => _CompanyMainHomeState();
+  _EmployeeMainState createState() => _EmployeeMainState();
 }
 class _Page {
   _Page({this.widget});
   final StatefulWidget widget;
 }
-class _CompanyMainHomeState extends State<CompanyMain>  with SingleTickerProviderStateMixin{
+class _EmployeeMainState extends State<EmployeeMain> with SingleTickerProviderStateMixin {
   var _controller;
   List<_Page> _allPages;
   int selected=0;
   @override
   void initState(){
     _allPages= <_Page>[
-      _Page(widget: CompanyHome()),
-      _Page(widget: CompanyEmployees()),
-      _Page(widget: CompanyQr()),
-      _Page(widget: CompanySettingScreen()),
+      _Page(widget: EmployeeHome()),
+      _Page(widget: EmployeeProfile()),
     ];
     _controller = TabController(vsync: this, length: _allPages.length);
     _controller.addListener((){
       print('index = $selected');
-       setState(() {
-            selected=_controller.index;
-       });
+      setState(() {
+        selected=_controller.index;
+      });
     });
     super.initState();
   }
@@ -62,8 +56,8 @@ class _CompanyMainHomeState extends State<CompanyMain>  with SingleTickerProvide
               decoration: BoxDecoration(
                   color: Constants.primary,
                   borderRadius: BorderRadius.only(
-                       topRight: Radius.circular(20),
-                       topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                    topLeft: Radius.circular(20),
                   )
               ),
               child: new Row(
@@ -73,38 +67,20 @@ class _CompanyMainHomeState extends State<CompanyMain>  with SingleTickerProvide
                   IconButton(
                       icon: Icon(Icons.home_outlined,color: selected==0?Colors.greenAccent:Colors.white,size: 5.0.h,),
                       onPressed: () {
-                         _controller.index=0;
-                         setState(() {
-                             selected=0;
-                         });
+                        _controller.index=0;
+                        setState(() {
+                          selected=0;
+                        });
                       }
                   ),
                   IconButton(
-                      icon: Icon(Icons.people_outline,color: selected==1?Colors.greenAccent:Colors.white,size: 5.0.h),
+                      icon: Icon(Icons.person_pin,color: selected==1?Colors.greenAccent:Colors.white,size: 5.0.h),
                       onPressed: () {
                         _controller.index=1;
                         setState(() {
                           selected=1;
                         });
-                      }
-                 ),
-                 IconButton(
-                      icon: Icon(Icons.qr_code,color: selected==2?Colors.greenAccent:Colors.white,size: 5.0.h),
-                      onPressed: () {
-                        _controller.index=2;
-                        setState(() {
-                          selected=2;
-                        });
-                      }
-                ),
-                  IconButton(
-                    icon: Icon(Icons.person_pin,color: selected==3?Colors.greenAccent:Colors.white,size: 5.0.h),
-                    onPressed: () {
-                      _controller.index=3;
-                      setState(() {
-                        selected=3;
-                      });
-                    }
+                  }
                   ),
                 ],
               ),

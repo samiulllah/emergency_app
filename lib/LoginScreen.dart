@@ -1,10 +1,15 @@
+import 'package:emergency_app/Company/Main.dart';
+import 'package:emergency_app/Company/PaymentScreen.dart';
 import 'package:emergency_app/Constants.dart';
 import 'package:emergency_app/Employee/RegistrationScreen.dart';
+import 'package:emergency_app/Employee/ScanQr.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:sizer/sizer.dart';
 
 import 'Company/RegistrationScreen.dart';
+import 'Providers/CompanyOperations.dart';
 class LoginScreen extends StatefulWidget {
   // this variable is used to show guide for users and appropriate registration page
   int userType;
@@ -17,7 +22,14 @@ class _LoginScreenState extends State<LoginScreen> {
   int userType;
   TextEditingController email=new TextEditingController();
   TextEditingController password=new TextEditingController();
+  CompanyOperations company;
 
+  bool progress=false;
+  @override
+  void initState(){
+    company=new CompanyOperations();
+    super.initState();
+  }
   _LoginScreenState({this.userType});
   @override
   Widget build(BuildContext context) {
@@ -43,10 +55,10 @@ class _LoginScreenState extends State<LoginScreen> {
                      padding: EdgeInsets.only(left: 20,right: 20),
                      child: TextField(
                        controller: email,
-                       textAlignVertical: TextAlignVertical.center,
                        textAlign: TextAlign.left,
                        keyboardType: TextInputType.emailAddress,
                        decoration: new InputDecoration(
+                           contentPadding: EdgeInsets.only(top: 12,left: 10),
                            border: new OutlineInputBorder(
                              borderRadius: const BorderRadius.all(
                                const Radius.circular(25.0),
@@ -71,6 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
                        controller: password,
                        obscureText: true,
                        decoration: new InputDecoration(
+                          contentPadding: EdgeInsets.only(top: 12,left: 10),
                            border: new OutlineInputBorder(
                              borderRadius: const BorderRadius.all(
                                const Radius.circular(25.0),
@@ -84,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
                    ),
                  ),
                  SizedBox(height: 5.0.h,),
-                 OutlineButton(
+                 !progress?OutlineButton(
                    color:Colors.white,
                    shape: RoundedRectangleBorder(
                      borderRadius: BorderRadius.circular(18.0),
@@ -96,8 +109,44 @@ class _LoginScreenState extends State<LoginScreen> {
                        height: 6.5.h,
                        child: Center(child: Text("Submit",style: GoogleFonts.breeSerif(fontSize: 14.0.sp,letterSpacing: .5,color: Colors.white),))
                    ),
-                   onPressed: (){},
-                 ),
+                   onPressed: ()async{
+                     //start progress
+                     setState(() {
+                       progress=true;
+                     });
+                     // handle login
+                     if(userType==0){
+                       // admin
+                       List<String> done=await company.handleLogin(email: email.text,password: password.text);
+                       if(done[0]=="1"){
+                          if(done[1]=="1"){
+                            // navigate admin to home
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (BuildContext context) => CompanyMain()));
+                          }
+                          else{
+                            // navigate admin to payment screen
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (BuildContext context) => PaymentScreen()));
+                          }
+                       }
+                       else{
+                         showMessage(context, done[1]);
+                       }
+                     }
+                     else{
+                       // employee
+
+                     }
+                     //stop progress
+                     setState(() {
+                       progress=false;
+                     });
+                     // clear fields
+                     email.text="";
+                     password.text="";
+                   },
+                 ):CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),),
                  SizedBox(height: 5.0.h,),
                  Text("-----------OR-----------",style: GoogleFonts.lato(color: Colors.white,fontSize: 16),),
                  SizedBox(height: 5.0.h,),
@@ -111,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         else{
                           // employee registration
                           Navigator.of(context).push(MaterialPageRoute(
-                              builder: (BuildContext context) => EmployeeRegistration()));
+                              builder: (BuildContext context) => ScanQr()));
                         }
                         print('value of user type = $userType');
                      },
@@ -123,4 +172,24 @@ class _LoginScreenState extends State<LoginScreen> {
        ),
     );
   }
+  void showMessage(BuildContext context,String message){
+    Alert(
+      context: context,
+      type: AlertType.info,
+      title: "SignUp Failed",
+      desc: message,
+      buttons: [
+        DialogButton(
+          child: Text(
+            "Try Again",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          onPressed: () => Navigator.pop(context),
+          color: Color.fromRGBO(0, 179, 134, 1.0),
+          radius: BorderRadius.circular(0.0),
+        ),
+      ],
+    ).show();
+  }
+
 }

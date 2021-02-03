@@ -31,6 +31,27 @@ dependencies:
   sizer: ^1.1.8
   google_fonts: ^1.1.2
   flutter_credit_card: ^0.1.4
+  rflutter_alert: ^1.1.0
+  qr_flutter: ^3.1.0
+  share: ^0.6.5+4
+  printing: ^4.0.0
+  path_provider: ^1.6.27
+  screenshot: ^0.2.0
+  back_button_interceptor: ^4.4.1
+  qr_code_scanner: ^0.3.0
+  flutter_signin_button: ^1.1.0
+  cloud_firestore: ^0.16.0
+  firebase_core: ^0.7.0
+  firebase_auth: ^0.20.0+1
+  shared_preferences: ^0.5.12+4
+  http_auth: ^0.3.1
+  webview_flutter: ^1.0.7
+  file_picker: ^2.1.6
+  firebase_storage: ^7.0.0
+  toast: ^0.1.5
+  audioplayers: ^0.17.3
+  nuts_activity_indicator: ^0.1.1
+  flutter_spinkit: ^4.1.2+1
 
 dev_dependencies:
   flutter_test:

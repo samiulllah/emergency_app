@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "146646381470",
+    "project_id": "hazardapp-b6790",
+    "storage_bucket": "hazardapp-b6790.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:146646381470:android:54474af62f4ddb9056dc8f",
+        "android_client_info": {
+          "package_name": "com.example.emergency_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "146646381470-3fplvfb92tgvjvoct2uu7p4qel4dqkaa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKejVLZ0pijYc3YYsv_q0QOFJ3X0eMf7o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "146646381470-3fplvfb92tgvjvoct2uu7p4qel4dqkaa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
