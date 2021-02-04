@@ -11,6 +11,15 @@ class CompanyEmployees extends StatefulWidget {
 
 class _CompanyEmployeesState extends State<CompanyEmployees> {
   List<Employee> employees=[];
+  List<Employee> completeList=[];
+  TextEditingController searchController=new TextEditingController();
+
+  @override
+  void dispose(){
+    searchController.dispose();
+    super.dispose();
+  }
+
   @override
   void initState(){
     super.initState();
@@ -18,17 +27,51 @@ class _CompanyEmployeesState extends State<CompanyEmployees> {
     employees.add(new Employee(name: "Philips",email: "ph23@gmail.com"));
     employees.add(new Employee(name: "John ",email: "jhon44@hotmail.com"));
     employees.add(new Employee(name: "Elizabeth",email: "eliza9090@gmail.com"));
+    completeList=employees;
+    searchController.addListener(() {
+      filterList(searchController.text);
+    });
   }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-          body:Container(
-            child:Column(
-              children: [
-                listOfEmployees(context)
-              ],
+          resizeToAvoidBottomInset: false,
+          body:SingleChildScrollView(
+            child: Container(
+              child:Column(
+                children: [
+                  completeList.length>0?SizedBox(height: 5.0.h,):Container(),
+                  completeList.length>0?Container(
+                    width: 90.0.w,
+                    height: 7.0.h,
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(left: 20,right: 20),
+                    child: TextField(
+                      controller: searchController,
+                      textAlignVertical: TextAlignVertical.center,
+                      textAlign: TextAlign.left,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: new InputDecoration(
+                          suffixIcon: Icon(Icons.search),
+                          contentPadding: EdgeInsets.only(top: 12,left: 10),
+                          border: new OutlineInputBorder(
+                              borderRadius: const BorderRadius.all(
+                                const Radius.circular(25.0),
+                              ),
+                              borderSide:  BorderSide(color:Constants.secondary)
+                          ),
+                          filled: true,
+                          hintStyle: new TextStyle(color: Colors.grey[800]),
+                          hintText: "Search",
+                          fillColor: Colors.grey[100]
+                      ),
+                    ),
+                  ):Container(),
+                  listOfEmployees(context)
+                ],
+              ),
             ),
           ),
         )
@@ -108,5 +151,26 @@ class _CompanyEmployeesState extends State<CompanyEmployees> {
       ),
     );
     return list;
+  }
+  void filterList(String name){
+    List<Employee> emps=[];
+    if(name==""){
+      setState(() {
+        employees=completeList;
+      });
+    }
+    else {
+      String up=name[0].toString().toUpperCase()+name.substring(1,name.length);
+      String low=name[0].toString().toLowerCase()+name.substring(1,name.length);
+      // print("Upper case $up and lower case $low");
+      for (Employee s in employees) {
+        if (s.name.contains(up) || s.name.contains(low)) {
+          emps.add(s);
+        }
+      }
+      setState(() {
+        employees = emps;
+      });
+    }
   }
 }

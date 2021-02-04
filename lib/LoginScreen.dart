@@ -118,16 +118,37 @@ class _LoginScreenState extends State<LoginScreen> {
                      if(userType==0){
                        // admin
                        List<String> done=await company.handleLogin(email: email.text,password: password.text);
+                       if(done[0]=="88"){
+                         showMessage(context, "The account doen't exists !");
+                         setState(() {
+                           progress=false;
+                         });
+                         return;
+                       }
                        if(done[0]=="1"){
-                          if(done[1]=="1"){
-                            // navigate admin to home
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (BuildContext context) => CompanyMain()));
+                          // checking user type
+                          if(done[2]=="0") {   // company
+                            if (done[1] == "1") {
+                              // navigate admin to home
+                              Navigator.of(context).pushReplacement(MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      CompanyMain(utype: 0,)));
+                            }
+                            else {
+                              // navigate admin to payment screen
+                              Navigator.of(context).pushReplacement(MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      PaymentScreen()));
+                            }
+                          }
+                          else if(done[2]=="1"){
+                            // admin
+                            Navigator.of(context).pushReplacement(MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    CompanyMain(utype: 1,)));
                           }
                           else{
-                            // navigate admin to payment screen
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (BuildContext context) => PaymentScreen()));
+                            showMessage(context, "This account isn't associated with admin or company !");
                           }
                        }
                        else{
@@ -174,9 +195,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
   void showMessage(BuildContext context,String message){
     Alert(
+
       context: context,
       type: AlertType.info,
-      title: "SignUp Failed",
+      title: "Login Failed",
       desc: message,
       buttons: [
         DialogButton(
@@ -184,7 +206,7 @@ class _LoginScreenState extends State<LoginScreen> {
             "Try Again",
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () =>    Navigator.of(context, rootNavigator: true).pop(),
           color: Color.fromRGBO(0, 179, 134, 1.0),
           radius: BorderRadius.circular(0.0),
         ),

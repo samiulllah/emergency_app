@@ -18,44 +18,51 @@ import 'package:flutter/cupertino.dart' as cup;
 
 
 class CompanyHome extends StatefulWidget {
+  int utype;
+  CompanyHome({this.utype});
   @override
-  _CompanyHomeState createState() => _CompanyHomeState();
+  _CompanyHomeState createState() => _CompanyHomeState(utype: utype);
 }
 class _Page {
   _Page({this.widget});
   final StatelessWidget widget;
 }
 class _CompanyHomeState extends State<CompanyHome> {
+  int utype;
   Map<String,dynamic> user;
   AudioPlayer audioPlugin;
+
   List<SoundClip> soundClips=new List<SoundClip>();
+  List<SoundClip> completeList=new List<SoundClip>();
+
+  TextEditingController searchController=new cup.TextEditingController();
   bool progress=true;
   int playingIndex=-1;
+
+  _CompanyHomeState({this.utype});
 
   Future<void> getAllClips() async {
     CompanyOperations comp=new CompanyOperations();
     List<SoundClip> clips=await comp.getAllClips();
     setState(() {
         soundClips=clips;
+        completeList=clips;
         progress=false;
     });
   }
   @override
   void dispose(){
+    searchController.dispose();
     audioPlugin.dispose();
      super.dispose();
   }
   @override
   void initState(){
+    searchController.addListener(() {
+      filterList(searchController.text);
+    });
     audioPlugin= AudioPlayer();
     getAllClips();
-    // audioPlugin.onDurationChanged.listen((Duration d) {
-    //   print('Max duration: $d');
-    // });
-    // audioPlugin.onAudioPositionChanged.listen((p) {
-    //    print("position is $p");
-    //  }
-    // );
     super.initState();
   }
   @override
@@ -63,11 +70,41 @@ class _CompanyHomeState extends State<CompanyHome> {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
        home: Scaffold(
+         resizeToAvoidBottomInset: false,
          body:Container(
            child:Column(
              mainAxisAlignment: !progress?MainAxisAlignment.start:cup.MainAxisAlignment.center,
              children: [
-               !progress?soundClips.length>0?renderAllClips():Center(child:Text("No alarm found"))
+               completeList.length>0? SizedBox(height: 5.0.h,):Container(),
+               completeList.length>0?Container(
+                 width: 90.0.w,
+                 height: 7.0.h,
+                 alignment: Alignment.center,
+                 padding: EdgeInsets.only(left: 20,right: 20),
+                 child: TextField(
+                   controller: searchController,
+                   textAlignVertical: TextAlignVertical.center,
+                   textAlign: TextAlign.left,
+                   keyboardType: TextInputType.emailAddress,
+                   decoration: new InputDecoration(
+                       suffixIcon: Icon(Icons.search),
+                       contentPadding: EdgeInsets.only(top: 12,left: 10),
+                       border: new OutlineInputBorder(
+                           borderRadius: const BorderRadius.all(
+                             const Radius.circular(25.0),
+                           ),
+                           borderSide:  BorderSide(color:Constants.secondary)
+                       ),
+                       filled: true,
+                       hintStyle: new TextStyle(color: Colors.grey[800]),
+                       hintText: "Search",
+                       fillColor: Colors.grey[100]
+                   ),
+                 ),
+               ):Container(),
+               !progress?soundClips.length>0?renderAllClips():Container(
+                   margin: cup.EdgeInsets.only(top: 20),
+                   child: Center(child:Text("No alarm found")))
                 :Center(
                   child: NutsActivityIndicator(
                    radius: 20,
@@ -81,13 +118,13 @@ class _CompanyHomeState extends State<CompanyHome> {
              ],
            ),
          ),
-         floatingActionButton: FloatingActionButton(
+         floatingActionButton: utype==0?FloatingActionButton(
               onPressed: (){
                 addClipPopup(context);
               },
               backgroundColor: Constants.secondary,
               child: Icon(Icons.library_music_outlined,),
-         ),
+         ):Container(),
        )
     );
   }
@@ -185,10 +222,15 @@ class _CompanyHomeState extends State<CompanyHome> {
                    SizedBox(width: 10,),
                    PopupMenuButton(
                      itemBuilder: (context) {
-                        return popupList();
+                        return popupList(clip);
                      },
                      onSelected: (value) {
-                       print("value:$value");
+                        if(value==2){
+                          removePopup(context,clip);
+                        }
+                        else if(value==1){
+                          detailPopup(context,clip);
+                        }
                      },
                      elevation: 4,
                      offset: Offset(0, 105),
@@ -208,37 +250,114 @@ class _CompanyHomeState extends State<CompanyHome> {
           ),
       );
   }
-  List<PopupMenuEntry<Object>> popupList(){
+  List<PopupMenuEntry<Object>> popupList(SoundClip clip){
     var list = List<PopupMenuEntry<Object>>();
       list.add(
         PopupMenuItem(
           child: Text("Impose"),
-          value: 1,
+          value: 0,
         ),
       );
-        list.add(
-          PopupMenuDivider(
-            height: 10,
-          ),
-        );
-        list.add(PopupMenuItem(
-          child: Text("Details"),
-          value: 1,
-        ));
       list.add(
         PopupMenuDivider(
           height: 10,
         ),
       );
-    list.add(
-      PopupMenuItem(
-        child: Text("Remove"),
+
+      list.add(PopupMenuItem(
+        child: Text("Details"),
         value: 1,
-      ),
-    );
+      ));
+      list.add(
+        PopupMenuDivider(
+          height: 10,
+        ),
+      );
+    if(utype==0) { // only company can remove
+      list.add(
+        PopupMenuItem(
+          child: Text("Remove"),
+          value: 2,
+        ),
+      );
+    }
     return list;
   }
+  detailPopup(cup.BuildContext context,SoundClip clip)async{
+    AlertDialog alert = AlertDialog(
+      content: SizedBox(
+        height:25.0.h,
+        child:Expanded(
+            child: Row(
+                children: [
+                   Column(
+                     crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Name",style: GoogleFonts.lato(fontSize: 14,fontWeight: FontWeight.bold),),
+                        SizedBox(height: 3.0.h,),
+                        Text("Description",style: GoogleFonts.lato(fontSize: 14,fontWeight: FontWeight.bold),),
+                        SizedBox(height: 3.0.h,),
+                        Text("Uploaded by ",style: GoogleFonts.lato(fontSize: 14,fontWeight: FontWeight.bold),),
+                        SizedBox(height: 3.0.h,),
+                        Text("Uploaded at",style: GoogleFonts.lato(fontSize: 14,fontWeight: FontWeight.bold),),
+                      ],
+                   ),
+                    SizedBox(width: 3.0.w,),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(clip.title,style:  GoogleFonts.lato(fontSize: 14),),
+                          SizedBox(height: 3.0.h,),
+                          Text(clip.description,style:  GoogleFonts.lato(fontSize: 14),),
+                          SizedBox(height: 3.0.h,),
+                          Text(clip.uid,style:  GoogleFonts.lato(fontSize: 14),),
+                          SizedBox(height: 3.0.h,),
+                          Flexible(child: Text(clip.datetime,style:  GoogleFonts.lato(fontSize: 14,),textAlign: TextAlign.left))
+                        ],
+                      ),
+                    )
+                ],
+            ),
+        ),
+      ),
+    );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
 
+  removePopup(cup.BuildContext context,SoundClip clip)async{
+
+    AlertDialog alert = AlertDialog(
+      content: SizedBox(
+        width: 100,
+        height:40,
+        child:SpinKitDualRing (
+           color: Colors.pinkAccent,
+           size: 30,
+        ),
+      ),
+    );
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+    await Future.delayed(Duration(seconds: 1),()async{
+      CompanyOperations comp=new CompanyOperations();
+      bool isDeleted=await comp.removeClip(sid:clip.soundId);
+      if(isDeleted){
+         await getAllClips();
+      }
+    });
+    Navigator.of(context, rootNavigator: true).pop();
+  }
   addClipPopup(BuildContext context){
     showDialog(
         context: context,
@@ -248,8 +367,37 @@ class _CompanyHomeState extends State<CompanyHome> {
         getAllClips();
     });
   }
-
+  void filterList(String name){
+   // print("------> $name");
+    List<SoundClip> clips=[];
+    if(name==""){
+      setState(() {
+        soundClips=completeList;
+      });
+    }
+    else {
+      String up=name[0].toString().toUpperCase()+name.substring(1,name.length);
+      String low=name[0].toString().toLowerCase()+name.substring(1,name.length);
+      print("Upper case $up and lower case $low");
+      for (SoundClip s in soundClips) {
+        if (s.title.contains(up) || s.title.contains(low)) {
+          clips.add(s);
+        }
+      }
+      setState(() {
+        soundClips = clips;
+      });
+    }
+  }
 }
+
+
+
+
+
+
+
+
 class Upload extends StatefulWidget {
   @override
   _UploadState createState() => _UploadState();
@@ -340,7 +488,10 @@ class _UploadState extends State<Upload> {
                 "Upload",
                 style: TextStyle(color: Colors.white, fontSize: 18),
               ),
-            ):Center(child: CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Constants.secondary),))
+            ):Container(
+                padding: EdgeInsets.only(bottom: 20,right: 20),
+                child: CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Constants.secondary),)
+            )
           ]),
     );
   }

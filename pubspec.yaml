@@ -52,6 +52,7 @@ dependencies:
   audioplayers: ^0.17.3
   nuts_activity_indicator: ^0.1.1
   flutter_spinkit: ^4.1.2+1
+  image_picker: ^0.6.7+22
 
 dev_dependencies:
   flutter_test:

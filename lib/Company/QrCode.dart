@@ -98,23 +98,6 @@ class QrPdf extends StatefulWidget {
 class _QrPdfState extends State<QrPdf> {
    String uri;
   _QrPdfState({this.uri});
-   void initState() {
-     super.initState();
-
-     BackButtonInterceptor.add(myInterceptor);
-   }
-
-   @override
-   void dispose() {
-     BackButtonInterceptor.remove(myInterceptor);
-     super.dispose();
-   }
-
-   bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info)  {
-      Navigator.of(context).pushReplacement(MaterialPageRoute(
-         builder: (BuildContext context) => CompanyMain()));
-     return true;
-   }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -138,11 +121,16 @@ class _QrPdfState extends State<QrPdf> {
           return pw.Column(
               mainAxisAlignment: pw.MainAxisAlignment.center,
               children:[
-                  pw.Image(
-                     image
+                  pw.Center(
+                     child: pw.Image(
+                         image
+                     )
                   ),
                   pw.SizedBox(height: 40),
-                  pw.Text("Please scan this image to get registered",style: pw.TextStyle(fontSize: 24,fontWeight: pw.FontWeight.bold))
+                  pw.Center(
+                     child: pw.Text("Please scan this image to get registered",style: pw.TextStyle(fontSize: 24,fontWeight: pw.FontWeight.bold))
+                  )
+
               ]
           );
         },

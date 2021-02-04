@@ -6,7 +6,9 @@ class SharedPref {
   read(String key) async {
     final prefs = await SharedPreferences.getInstance();
     String jj=prefs.getString(key);
-    print("value of user = "+jj);
+    if(jj==null){
+      return null;
+    }
     return json.decode(jj);
   }
 

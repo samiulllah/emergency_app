@@ -6,6 +6,7 @@ import 'package:emergency_app/Employee/Home.dart';
 import 'package:emergency_app/LoginScreen.dart';
 import 'package:emergency_app/Providers/SharedPref.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -64,14 +65,18 @@ class _FlashScreenState extends State<FlashScreen> {
             if (userType == 0) {
               if(user['isPayed']=="1"){
                 // navigate admin to home
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (BuildContext context) => CompanyMain()));
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                    builder: (BuildContext context) => CompanyMain(utype: userType,)));
               }
               else{
                 // navigate admin to payment screen
-                Navigator.of(context).push(MaterialPageRoute(
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
                     builder: (BuildContext context) => PaymentScreen()));
               }
+            }
+            else if(userType==1){
+              Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  builder: (BuildContext context) => CompanyMain(utype: userType,)));
             }
             else {
               Navigator.of(context).pushReplacement(MaterialPageRoute(
@@ -175,6 +180,4 @@ class _EmpOrAdminState extends State<EmpOrAdmin> {
       );
   }
 }
-
-
 

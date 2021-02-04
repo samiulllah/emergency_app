@@ -119,7 +119,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           }
 
                           Navigator.of(context).pushReplacement(MaterialPageRoute(
-                              builder: (BuildContext context) => CompanyMain()));
+                              builder: (BuildContext context) => CompanyMain(utype: 0,)));
                         },
                       )
                     ],

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:emergency_app/Models/Employee.dart';
 import 'package:emergency_app/Models/SoundClip.dart';
 import 'package:emergency_app/Providers/SharedPref.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -48,29 +49,64 @@ class CompanyOperations{
 
   // login
   Future<List<String>> handleLogin({String email,String password})async{
+
     List<String> response=[];
+    bool isDelete=await runAdminMiddleware(email,password);
+    if(isDelete) {
+       response.add("88");
+       return response;
+    }
+    int utype=-1;
     try {
+      SharedPref sharedPref=new SharedPref();
       UserCredential  userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email,
           password: password
       );
-
       response.add("1");
-      QuerySnapshot snapshot=await FirebaseFirestore.instance.collection("CompanyRegistrations").where("CompanyEmail",isEqualTo: email).get();
-      Map<String,dynamic> data=snapshot.docs[0].data();
-      SharedPref sharedPref=new SharedPref();
-      sharedPref.save("user", {'type':'0','name':'${data['CompanyName']}','email':'${data['CompanyEmail']}','phone':'${data['CompanyPhone']}','address':'${data['CompanyAddress']}','isPayed':'0'});
+      // lets determine user type
+        // let it be admin
+      QuerySnapshot snapshot=await FirebaseFirestore.instance.collection("CompanyAdmins").where("email",isEqualTo:email).get();
+      if(snapshot.docs.length>0){
+        Map<String, dynamic> data = snapshot.docs[0].data();
+        utype=1; //// admin
+        sharedPref.save("user", {'type':'1','name':'${data['name']}','email':'${data['email']}','phone':'${data['phone']}'});
+      }
 
-      if(snapshot.docs[0].get("isPayed")=="0"){
-        // navigate to payment screen
-        response.add("0");
+      //let it be company
+      QuerySnapshot snap=await FirebaseFirestore.instance.collection("CompanyRegistrations").where("CompanyEmail",isEqualTo: email).get();
+      if(snap.docs.length>0) {
+        Map<String, dynamic> data = snap.docs[0].data();
+        utype = 0; // company
+
+        sharedPref.save("user", {
+          'type': '0',
+          'name': '${data['CompanyName']}',
+          'email': '${data['CompanyEmail']}',
+          'phone': '${data['CompanyPhone']}',
+          'address': '${data['CompanyAddress']}',
+          'isPayed': '${snap.docs[0].get("isPayed")}'
+        });
+
+        if (snap.docs[0].get("isPayed") == "0") {
+          // navigate to payment screen
+          response.add("0");
+        }
+        else {
+          // navigate to home
+          response.add("1");
+        }
+      }
+      if(utype==-1 || utype==1) {
+        response.add("a");
+        response.add('$utype');
       }
       else{
-         // navigate to home
-        response.add("1");
+        response.add('$utype');
       }
 
     } on FirebaseAuthException catch (e) {
+      print("yes erro is thrown ----> $e");
       response.add("0");
       if (e.code == 'user-not-found') {
         response.add("This $email isn't  registered.");
@@ -108,15 +144,158 @@ class CompanyOperations{
       return false;
     }
   }
+  // remove a clip
+  Future<bool> removeClip({String sid})async{
+     bool isDelete=false;
+     SharedPref sharedPref=new SharedPref();
+     Map<String,dynamic> user=await sharedPref.read("user");
+     String email=await user['email'];
+     QuerySnapshot snapshot=await FirebaseFirestore.instance.collection("CompanySounds").doc(email).collection("All").where("sid",isEqualTo: sid).get();
+     if(snapshot.docs.length>0){
+         String docRef=await snapshot.docs[0].reference.id.toString();
+         await FirebaseFirestore.instance.collection("CompanySounds").doc(email).collection("All").
+                                doc(docRef).delete();
+         isDelete=true;
+     }
+     return isDelete;
+  }
   // fetch all clips of this company
   Future<List<SoundClip>> getAllClips()async{
     List<SoundClip> clips=new List<SoundClip>();
     SharedPref sharedPref=new SharedPref();
     Map<String,dynamic> user=await sharedPref.read("user");
-    QuerySnapshot snapshot=await FirebaseFirestore.instance.collection("CompanySounds").doc("${user['email']}").collection("All").get();
+    QuerySnapshot snapshot;
+    if(user['type']=="0"){
+       snapshot=await FirebaseFirestore.instance.collection("CompanySounds").doc("${user['email']}").collection("All").get();
+    }
+    else{
+      String cid=await getAdminCompany();
+      snapshot=await FirebaseFirestore.instance.collection("CompanySounds").doc(cid).collection("All").get();
+    }
     for(int i=0;i<snapshot.docs.length;i++){
       clips.add(SoundClip.fromJson(snapshot.docs[i].data()));
     }
+
     return clips;
   }
+  Future<String> getAdminCompany()async{
+    SharedPref sharedPref=new SharedPref();
+    Map<String,dynamic> user=await sharedPref.read("user");
+    String email=await user['email'];
+    QuerySnapshot snapshot=await FirebaseFirestore.instance.collection("CompanyAdmins").where("email",isEqualTo:email).get();
+    return snapshot.docs[0].get("companyId");
+  }
+  // fetch all administrators
+  Future<List<Employee>> getAllAdministrators()async{
+    List<Employee> emps=new List<Employee>();
+    SharedPref sharedPref=new SharedPref();
+    Map<String,dynamic> user=await sharedPref.read("user");
+    String cid=await user['email'];
+    QuerySnapshot snapshot=await FirebaseFirestore.instance.collection("CompanyAdmins").where("companyId",isEqualTo:cid ).get();
+    for(int i=0;i<snapshot.docs.length;i++){
+      emps.add(Employee.fromJson(snapshot.docs[i].data()));
+    }
+    return emps;
+  }
+  // saving an administrator
+  Future<bool> saveAdmin({String email,String password,String name,String phone})async{
+    try{
+      UserCredential  userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email,
+          password: password
+      );
+      SharedPref sharedPref=new SharedPref();
+      Map<String,dynamic> user=await sharedPref.read("user");
+      String cid=await user['email'];
+        FirebaseFirestore.instance.collection("CompanyAdmins").add({
+          "companyId":cid,
+          "joinedOn":DateTime.now().toString(),
+          "email":email,
+          "name":name,
+          "phone":phone
+        });
+      return true;
+    }catch(e){
+      return false;
+    }
+  }
+  // removing administrator
+  Future<bool>  removeAdmin(String email)async{
+    try{
+      SharedPref sharedPref=new SharedPref();
+      Map<String,dynamic> user=await sharedPref.read("user");
+      String cid=await user['email'];
+      QuerySnapshot snapshot=await FirebaseFirestore.instance.collection("CompanyAdmins").where("email",isEqualTo: email).where("companyId",isEqualTo: cid).get();
+      if(snapshot.docs.length>0){
+        String docRef=await snapshot.docs[0].reference.id.toString();
+        await FirebaseFirestore.instance.collection("CompanyAdmins").doc(docRef).delete();
+        await FirebaseFirestore.instance.collection("DeletedAdmins").add({
+          "cid": cid,
+          "uid": email
+        });
+      }
+      else{
+        return false;
+      }
+      return true;
+    }catch(e){
+      return false;
+    }
+  }
+  Future<bool> runAdminMiddleware(String email,String password)async{
+    try {
+       // check if present in deleted
+      QuerySnapshot snapshot=await FirebaseFirestore.instance.collection("DeletedAdmins").where("uid",isEqualTo: email).get();
+      if(snapshot.docs.length>0){
+        bool isDelete=await removeId(email, password);
+        if(isDelete){
+          await snapshot.docs[0].reference.delete();
+        }else{
+          return false;
+        }
+      }
+      else{
+        return false;
+      }
+      return true;
+    }catch(e){
+      return false;
+    }
+  }
+  // remove auth id
+  Future<bool> removeId(String email,String password)async{
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+          email: email,
+          password: password
+      );
+      await userCredential.user.delete();
+      return true;
+    }catch(e){
+      return false;
+    }
+  }
+  // update profile
+  Future<bool>  updateProfile({String name,String phone,String address,File img})async{
+    bool isUpdate=false;
+    if(img==null){
+      SharedPref sharedPref=new SharedPref();
+      Map<String,dynamic> user=await sharedPref.read("user");
+      if(user.containsKey("avatar")){
+        // already have avatar means update and delete previous
+
+      }
+      else{
+        // means first time creation of avatar
+
+      }
+    }
+    else{
+       // only text update
+
+    }
+    return isUpdate;
+  }
+  // update pr
 }
