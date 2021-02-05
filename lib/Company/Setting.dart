@@ -62,7 +62,7 @@ class _CompanySettingScreenState extends State<CompanySettingScreen> {
               SharedPref sharedPref=new SharedPref();
               await sharedPref.remove("user");
               Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (BuildContext context) => EmpOrAdmin()));
+                  builder: (BuildContext context) => EmpOrAdmin(initialState: 1,)));
             }),
             Expanded(
               child: Align(

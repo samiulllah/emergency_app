@@ -88,7 +88,7 @@ class _FlashScreenState extends State<FlashScreen> {
           else {
             //not login nav to continue as company, administrator or employee.
             Navigator.of(context).pushReplacement(MaterialPageRoute(
-                builder: (BuildContext context) => EmpOrAdmin()));
+                builder: (BuildContext context) => EmpOrAdmin(initialState: 0,)));
           }
         }
     );
@@ -123,11 +123,15 @@ class _FlashScreenState extends State<FlashScreen> {
 }
 
 class EmpOrAdmin extends StatefulWidget {
+  int initialState;
+  EmpOrAdmin({this.initialState});
   @override
-  _EmpOrAdminState createState() => _EmpOrAdminState();
+  _EmpOrAdminState createState() => _EmpOrAdminState(initialState: initialState);
 }
 
 class _EmpOrAdminState extends State<EmpOrAdmin> {
+  int initialState;
+  _EmpOrAdminState({this.initialState});
   @override
   void initState(){
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -149,8 +153,15 @@ class _EmpOrAdminState extends State<EmpOrAdmin> {
               ),
               SizedBox(height: 10.0.h,),
               roundButton(title: "Company or Admin",onTap: (){
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (BuildContext context) => LoginScreen(userType: 0,)));
+                if(initialState==0) {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          LoginScreen(userType: 0,)));
+                }else{
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          LoginScreen(userType: 0,)));
+                }
               }),
               SizedBox(height: 20,),
               Center(
@@ -158,8 +169,16 @@ class _EmpOrAdminState extends State<EmpOrAdmin> {
               ),
               SizedBox(height: 20,),
               roundButton(title: "Employee or Contractor",onTap: (){
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (BuildContext context) => LoginScreen(userType: 2,)));
+                if(initialState==0) {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          LoginScreen(userType: 2,)));
+                }
+                else{
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          LoginScreen(userType: 2,)));
+                }
               }),
             ],
         ),

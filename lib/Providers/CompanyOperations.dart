@@ -5,6 +5,7 @@ import 'package:emergency_app/Models/SoundClip.dart';
 import 'package:emergency_app/Providers/SharedPref.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'package:path/path.dart';
@@ -180,6 +181,7 @@ class CompanyOperations{
 
     return clips;
   }
+
   Future<String> getAdminCompany()async{
     SharedPref sharedPref=new SharedPref();
     Map<String,dynamic> user=await sharedPref.read("user");
@@ -187,6 +189,7 @@ class CompanyOperations{
     QuerySnapshot snapshot=await FirebaseFirestore.instance.collection("CompanyAdmins").where("email",isEqualTo:email).get();
     return snapshot.docs[0].get("companyId");
   }
+
   // fetch all administrators
   Future<List<Employee>> getAllAdministrators()async{
     List<Employee> emps=new List<Employee>();
@@ -199,6 +202,19 @@ class CompanyOperations{
     }
     return emps;
   }
+  // fetch all employees
+  Future<List<Employee>> getAllEmployees()async{
+    List<Employee> emps=new List<Employee>();
+    SharedPref sharedPref=new SharedPref();
+    Map<String,dynamic> user=await sharedPref.read("user");
+    String cid=await user['email'];
+    QuerySnapshot snapshot=await FirebaseFirestore.instance.collection("EmployeesRegistration").where("cid",isEqualTo:cid ).get();
+    for(int i=0;i<snapshot.docs.length;i++){
+      emps.add(Employee.fromJson(snapshot.docs[i].data()));
+    }
+    return emps;
+  }
+
   // saving an administrator
   Future<bool> saveAdmin({String email,String password,String name,String phone})async{
     try{
@@ -221,6 +237,7 @@ class CompanyOperations{
       return false;
     }
   }
+
   // removing administrator
   Future<bool>  removeAdmin(String email)async{
     try{
@@ -229,9 +246,41 @@ class CompanyOperations{
       String cid=await user['email'];
       QuerySnapshot snapshot=await FirebaseFirestore.instance.collection("CompanyAdmins").where("email",isEqualTo: email).where("companyId",isEqualTo: cid).get();
       if(snapshot.docs.length>0){
+        if(snapshot.docs[0].data().containsKey("avatar")) {
+          String avatar = snapshot.docs[0].data()['avatar'];
+          await deleteStorageFile(avatar);
+        }
         String docRef=await snapshot.docs[0].reference.id.toString();
         await FirebaseFirestore.instance.collection("CompanyAdmins").doc(docRef).delete();
         await FirebaseFirestore.instance.collection("DeletedAdmins").add({
+          "cid": cid,
+          "uid": email
+        });
+      }
+      else{
+        return false;
+      }
+      return true;
+    }catch(e){
+      return false;
+    }
+  }
+
+  // removing employee
+  Future<bool>  removeEmployee(String email)async{
+    try{
+      SharedPref sharedPref=new SharedPref();
+      Map<String,dynamic> user=await sharedPref.read("user");
+      String cid=await user['email'];
+      QuerySnapshot snapshot=await FirebaseFirestore.instance.collection("EmployeesRegistration").where("email",isEqualTo: email).get();
+      if(snapshot.docs.length>0){
+        if(snapshot.docs[0].data().containsKey("avatar")) {
+          String avatar = snapshot.docs[0].data()['avatar'];
+          await deleteStorageFile(avatar);
+        }
+        String docRef=await snapshot.docs[0].reference.id.toString();
+        await FirebaseFirestore.instance.collection("EmployeesRegistration").doc(docRef).delete();
+        await FirebaseFirestore.instance.collection("DeletedEmployees").add({
           "cid": cid,
           "uid": email
         });
@@ -264,6 +313,7 @@ class CompanyOperations{
       return false;
     }
   }
+
   // remove auth id
   Future<bool> removeId(String email,String password)async{
     try {
@@ -278,6 +328,7 @@ class CompanyOperations{
       return false;
     }
   }
+
   // update profile
   Future<bool>  updateCompanyProfile({String name,String phone,String address,File img,String avatar,String email,int userType})async{
     bool isUpdate=false;
@@ -330,6 +381,7 @@ class CompanyOperations{
     }
     return isUpdate;
   }
+
   Future<bool> uploadAndWrite({File img,String email,String name,String phone,String address,int userType})async{
     try {
       FirebaseStorage storage = await FirebaseStorage.instance;
@@ -371,6 +423,7 @@ class CompanyOperations{
        return false;
     }
   }
+
   // delete file
   Future<bool> deleteStorageFile(String uri)async{
     try {
@@ -386,6 +439,7 @@ class CompanyOperations{
       return false;
     }
   }
+
   // fetch user profile
   Future<Map<String,dynamic>>  fetchUser(String email,int userType)async{
     Map<String,dynamic> response=new Map();
@@ -424,4 +478,30 @@ class CompanyOperations{
     }
     return response;
   }
+  Future<bool> impose(SoundClip clip)async{
+    // fetch all player ids to notify
+    List<String> pids=[];
+    SharedPref sharedPref=new SharedPref();
+    Map<String,dynamic> user=await sharedPref.read("user");
+    String cid=await user['email'];
+    QuerySnapshot snapshot=await FirebaseFirestore.instance.collection("EmployeeDevices").where("cid",isEqualTo: cid).get();
+    if(snapshot.docs.length>0) {
+      for (int i = 0; i < snapshot.docs.length; i++) {
+          pids.add(snapshot.docs[i].data()['playerId']);
+      }
+      // notify all of them
+      var notification = OSCreateNotification(
+        playerIds: pids,
+        content: clip.description,
+        heading: clip.title,
+        additionalData: {
+           "clipUrl":clip.clipUri
+        }
+      );
+      var response = await OneSignal.shared.postNotification(notification);
+      return true;
+    }
+    return false;
+  }
+
 }

@@ -1,6 +1,9 @@
 import 'package:emergency_app/Models/Employee.dart';
+import 'package:emergency_app/Providers/CompanyOperations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
 import 'package:sizer/sizer.dart';
 import '../Constants.dart';
 
@@ -13,7 +16,17 @@ class _CompanyEmployeesState extends State<CompanyEmployees> {
   List<Employee> employees=[];
   List<Employee> completeList=[];
   TextEditingController searchController=new TextEditingController();
+  bool progress=true;
 
+  Future<void> getAllEmps()async{
+    CompanyOperations comp=new CompanyOperations();
+    List<Employee> admins=await comp.getAllEmployees();
+    setState(() {
+      employees=admins;
+      completeList=admins;
+      progress=false;
+    });
+  }
   @override
   void dispose(){
     searchController.dispose();
@@ -22,15 +35,11 @@ class _CompanyEmployeesState extends State<CompanyEmployees> {
 
   @override
   void initState(){
-    super.initState();
-    employees.add(new Employee(name: "Adnan",email:"adnan2@gmailcom"));
-    employees.add(new Employee(name: "Philips",email: "ph23@gmail.com"));
-    employees.add(new Employee(name: "John ",email: "jhon44@hotmail.com"));
-    employees.add(new Employee(name: "Elizabeth",email: "eliza9090@gmail.com"));
-    completeList=employees;
     searchController.addListener(() {
       filterList(searchController.text);
     });
+    getAllEmps();
+    super.initState();
   }
   @override
   Widget build(BuildContext context) {
@@ -38,7 +47,7 @@ class _CompanyEmployeesState extends State<CompanyEmployees> {
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           resizeToAvoidBottomInset: false,
-          body:SingleChildScrollView(
+          body:!progress?SingleChildScrollView(
             child: Container(
               child:Column(
                 children: [
@@ -69,11 +78,25 @@ class _CompanyEmployeesState extends State<CompanyEmployees> {
                       ),
                     ),
                   ):Container(),
-                  listOfEmployees(context)
+                  employees.length>0?listOfEmployees(context): Container(
+                      margin: EdgeInsets.only(top: 20),
+                      child: Center(child:Text("No employee found ")))
+
+
                 ],
               ),
             ),
-          ),
+          ):Center(
+            child: NutsActivityIndicator(
+              radius: 20,
+              activeColor: Colors.indigo,
+              inactiveColor: Colors.red,
+              tickCount: 11,
+              startRatio: 0.55,
+              animationDuration: Duration(milliseconds: 123),
+            ),
+          )
+          ,
         )
     );
   }
@@ -92,7 +115,8 @@ class _CompanyEmployeesState extends State<CompanyEmployees> {
       margin: EdgeInsets.only(top: 20),
       child: Row(
         children: [
-          Icon(Icons.person_pin,size: 15.0.w,),
+          emp.avatar==null?Icon(Icons.person_pin,size: 15.0.w,):
+          showProfilePic(emp.avatar),
           SizedBox(width: 20,),
           SizedBox(
             width: 50.0.w,
@@ -111,7 +135,12 @@ class _CompanyEmployeesState extends State<CompanyEmployees> {
               return popupList();
             },
             onSelected: (value) {
-              print("value:$value");
+              if(value==0){
+                detailPopup(context, emp);
+              }
+              else if(value==1){
+                removePopup(context, emp);
+              }
             },
             elevation: 4,
             offset: Offset(0, 105),
@@ -131,12 +160,32 @@ class _CompanyEmployeesState extends State<CompanyEmployees> {
       ),
     );
   }
+  Widget showProfilePic(String avatar){
+    return CircleAvatar(
+      radius: 4.5.h,
+      child: CircleAvatar(
+        radius: 4.0.h,
+        backgroundImage: Image.network(avatar,width: 4.0.w,height: 4.0.h,fit: BoxFit.fill,
+          loadingBuilder:(BuildContext context, Widget child,ImageChunkEvent loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null ?
+                loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
+                    : null,
+              ),
+            );
+          },
+        ).image,
+      ),
+    );
+  }
   List<PopupMenuEntry<Object>> popupList(){
     var list = List<PopupMenuEntry<Object>>();
     list.add(
       PopupMenuItem(
         child: Text("Details"),
-        value: 1,
+        value: 0,
       ),
     );
     list.add(
@@ -173,4 +222,105 @@ class _CompanyEmployeesState extends State<CompanyEmployees> {
       });
     }
   }
+  detailPopup(BuildContext context,Employee emp)async{
+    AlertDialog alert = AlertDialog(
+      content: SizedBox(
+        height:100.0.h/2,
+        child:Expanded(
+          child: Column(
+              children: [
+                if(emp.avatar!=null)CircleAvatar(
+                  radius: 10.5.h,
+                  child: CircleAvatar(
+                    radius: 10.0.h,
+                    backgroundImage: Image.network(emp.avatar,width: 10.0.w,height: 10.0.h,fit: BoxFit.fill,
+                      loadingBuilder:(BuildContext context, Widget child,ImageChunkEvent loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null ?
+                            loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
+                                : null,
+                          ),
+                        );
+                      },
+                    ).image,
+                  ),
+                ),
+                if(emp.avatar!=null)SizedBox(height: 4.0.h,),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Name",style: GoogleFonts.lato(fontSize: 14,fontWeight: FontWeight.bold),),
+                          SizedBox(height: 3.0.h,),
+                          Text("Email",style: GoogleFonts.lato(fontSize: 14,fontWeight: FontWeight.bold),),
+                          SizedBox(height: 3.0.h,),
+                          Text("Phone Number",style: GoogleFonts.lato(fontSize: 14,fontWeight: FontWeight.bold),),
+                          SizedBox(height: 3.0.h,),
+                          Text("Created on",style: GoogleFonts.lato(fontSize: 14,fontWeight: FontWeight.bold),),
+                        ],
+                      ),
+                      SizedBox(width: 3.0.w,),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(emp.name,style:  GoogleFonts.lato(fontSize: 14),),
+                            SizedBox(height: 3.0.h,),
+                            Text(emp.email,style:  GoogleFonts.lato(fontSize: 14),),
+                            SizedBox(height: 3.0.h,),
+                            Text(emp.phoneNumber,style:  GoogleFonts.lato(fontSize: 14),),
+                            SizedBox(height: 3.0.h,),
+                            Flexible(child: Text(emp.joinedOn,style:  GoogleFonts.lato(fontSize: 14,),textAlign: TextAlign.left))
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ]
+          ),
+        ),
+      ),
+    );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  removePopup(BuildContext context,Employee emp)async{
+
+    AlertDialog alert = AlertDialog(
+      content: SizedBox(
+        width: 100,
+        height:40,
+        child:SpinKitDualRing (
+          color: Colors.pinkAccent,
+          size: 30,
+        ),
+      ),
+    );
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+    await Future.delayed(Duration(seconds: 1),()async{
+      CompanyOperations comp=new CompanyOperations();
+      bool isDeleted=await comp.removeEmployee(emp.email);
+      if(isDeleted){
+        await getAllEmps();
+      }
+    });
+    Navigator.of(context, rootNavigator: true).pop();
+  }
+
 }

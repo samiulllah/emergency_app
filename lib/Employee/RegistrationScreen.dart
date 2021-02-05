@@ -169,7 +169,7 @@ class _EmployeeRegistrationState extends State<EmployeeRegistration> {
                     progress=false;
                   });
                   if(res[0]=="1") {
-                    Navigator.of(context).push(MaterialPageRoute(
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
                         builder: (BuildContext context) => EmployeeMain()));
                   }
                   else{

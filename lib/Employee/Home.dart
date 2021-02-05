@@ -2,6 +2,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:emergency_app/Models/SoundClip.dart';
 import 'package:emergency_app/Providers/EmployeeServies.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
 import 'package:sizer/sizer.dart';
@@ -107,16 +108,22 @@ class _EmployeeHomeState extends State<EmployeeHome> {
       shrinkWrap: true,
       itemCount: soundClips.length,
       itemBuilder: (context,index){
-        return clipItem(soundClips[index]);
+        return clipItem(soundClips[index],context,index);
       },
     );
   }
-  Widget clipItem(SoundClip clip){
+  Widget clipItem(SoundClip clip,BuildContext context,int index){
     return Container(
       margin: EdgeInsets.only(top: 20),
       child: Row(
         children: [
-          Icon(Icons.surround_sound,size: 12.0.w,),
+          clip.playing?clip.loading?SpinKitDualRing(
+            size: 8.0.w,
+            color: Colors.black,
+          ):SpinKitWave(
+            size: 8.0.w,
+            color: Colors.black,
+          ):Icon(Icons.surround_sound,size: 12.0.w,),
           SizedBox(width: 20,),
           SizedBox(
             width: 50.0.w,
@@ -132,9 +139,49 @@ class _EmployeeHomeState extends State<EmployeeHome> {
           Spacer(),
           GestureDetector(
             onTap: (){
-              setState(() {
-                clip.playing=!clip.playing;
-              });
+              if(clip.playing==true){
+                setState(() {
+                  clip.playing=false;
+                });
+              }
+              else{
+                if(playingIndex!=index && playingIndex>=0){
+                  // means already one is playing let stop that first
+                  setState(() {
+                    soundClips[playingIndex].playing=false;
+                  });
+                  audioPlugin.stop();
+                  audioPlugin.dispose();
+                  audioPlugin=new AudioPlayer();
+                }
+                setState(() {
+                  clip.playing=true;
+                  clip.loading=true;
+                });
+                playingIndex=index;
+              }
+
+
+              if(clip.playing){
+                audioPlugin.play(clip.clipUri);
+                audioPlugin.onDurationChanged.listen((Duration d) {
+                  print("duration fetched  =${d.inSeconds}");
+                  if(d.inSeconds>0 ){
+                    setState(() {
+                      clip.loading=false;
+                    });
+                  }
+                });
+                audioPlugin.onPlayerCompletion.listen((event) {
+                  setState(() {
+                    clip.playing=false;
+                  });
+                });
+              }
+              else{
+                audioPlugin.stop();
+              }
+
             },
             child: Container(
                 width: 30,
@@ -147,40 +194,10 @@ class _EmployeeHomeState extends State<EmployeeHome> {
             ),
           ),
           SizedBox(width: 10,),
-          PopupMenuButton(
-            itemBuilder: (context) {
-              return popupList();
-            },
-            onSelected: (value) {
-              print("value:$value");
-            },
-            elevation: 4,
-            offset: Offset(0, 105),
-            child: Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
-                    shape: BoxShape.circle
-                ),
-                child: Center(child: Icon(Icons.more_horiz))
-            ),
-          ),
-          SizedBox(width: 2,),
 
         ],
       ),
     );
-  }
-  List<PopupMenuEntry<Object>> popupList(){
-    var list = List<PopupMenuEntry<Object>>();
-    list.add(
-      PopupMenuItem(
-        child: Text("Details"),
-        value: 1,
-      ),
-    );
-    return list;
   }
   void filterList(String name){
     List<SoundClip> clips=[];

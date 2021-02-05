@@ -228,6 +228,9 @@ class _CompanyHomeState extends State<CompanyHome> {
                         else if(value==1){
                           detailPopup(context,clip);
                         }
+                        else if(value==0){
+                          imposePopup(context,clip);
+                        }
                      },
                      elevation: 4,
                      offset: Offset(0, 105),
@@ -355,6 +358,31 @@ class _CompanyHomeState extends State<CompanyHome> {
     });
     Navigator.of(context, rootNavigator: true).pop();
   }
+  imposePopup(cup.BuildContext context,SoundClip clip)async{
+
+    AlertDialog alert = AlertDialog(
+      content: SizedBox(
+        width: 100,
+        height:40,
+        child:SpinKitDualRing (
+          color: Colors.pinkAccent,
+          size: 30,
+        ),
+      ),
+    );
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+    await Future.delayed(Duration(seconds: 1),()async{
+      CompanyOperations comp=new CompanyOperations();
+      await comp.impose(clip);
+    });
+    Navigator.of(context, rootNavigator: true).pop();
+  }
   addClipPopup(BuildContext context){
     showDialog(
         context: context,
@@ -364,6 +392,7 @@ class _CompanyHomeState extends State<CompanyHome> {
         getAllClips();
     });
   }
+
   void filterList(String name){
    // print("------> $name");
     List<SoundClip> clips=[];

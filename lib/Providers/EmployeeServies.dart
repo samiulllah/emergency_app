@@ -9,7 +9,16 @@ import 'package:path/path.dart';
 import 'package:path/path.dart' as Path;
 import 'package:firebase_storage/firebase_storage.dart';
 class EmployeeOperations{
-
+   // write save player id
+   Future<void> savePlayerId(String pid)async{
+     SharedPref sharedPref=new SharedPref();
+     Map<String,dynamic> user=await sharedPref.read("user");
+     String cid=await user['cid'];
+     await FirebaseFirestore.instance.collection("EmployeeDevices").add({
+       "cid":cid,
+       "playerId":pid
+     });
+   }
    // getting hash list of emails
    Future<List<Map<String,dynamic>>>  getAllHashedEmails()async{
      List<Map<String,dynamic>> listOfHashes=[];
@@ -43,7 +52,7 @@ class EmployeeOperations{
              "cid":cid,
              "cname":cname,
              "name":name,
-             "Datetime":DateTime.now().toString()
+             "joinedOn":DateTime.now().toString()
            }
        );
        SharedPref sharedPref=new SharedPref();
@@ -130,6 +139,7 @@ class EmployeeOperations{
       return false;
     }
   }
+
    // fetch user profile
    Future<Map<String,dynamic>>  fetchUser(String email)async{
      Map<String,dynamic> response=new Map();
