@@ -1,8 +1,10 @@
 import 'package:emergency_app/Company/Main.dart';
 import 'package:emergency_app/Company/PaymentScreen.dart';
 import 'package:emergency_app/Constants.dart';
+import 'package:emergency_app/Employee/Main.dart';
 import 'package:emergency_app/Employee/RegistrationScreen.dart';
 import 'package:emergency_app/Employee/ScanQr.dart';
+import 'package:emergency_app/Providers/EmployeeServies.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -157,7 +159,23 @@ class _LoginScreenState extends State<LoginScreen> {
                      }
                      else{
                        // employee
-
+                        EmployeeOperations empOps=new EmployeeOperations();
+                        List<String> done=await empOps.handleLogin(email: email.text,password: password.text);
+                        if(done[0]=="3"){
+                          showMessage(context, "The account doesn't exists !");
+                          setState(() {
+                            progress=false;
+                          });
+                          return;
+                        }
+                        if(done[0]=="1"){
+                          Navigator.of(context).pushReplacement(MaterialPageRoute(
+                              builder: (BuildContext context) =>
+                                  EmployeeMain()));
+                        }
+                        else{
+                          showMessage(context, done[1]);
+                        }
                      }
                      //stop progress
                      setState(() {

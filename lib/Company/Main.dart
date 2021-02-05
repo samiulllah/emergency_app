@@ -4,6 +4,7 @@ import 'package:emergency_app/Company/Home.dart';
 import 'package:emergency_app/Company/Profile.dart';
 import 'package:emergency_app/Company/Setting.dart';
 import 'package:emergency_app/Constants.dart';
+import 'package:emergency_app/Providers/SharedPref.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
@@ -32,7 +33,7 @@ class _CompanyMainHomeState extends State<CompanyMain>  with SingleTickerProvide
       _Page(widget: CompanyHome(utype: utype,)),
       _Page(widget: CompanyEmployees()),
       _Page(widget: CompanyQr()),
-      utype==0?_Page(widget: CompanySettingScreen()):_Page(widget: CompanyProfile(userType: 1,))
+      _Page(widget: CompanySettingScreen(utype: utype,))
     ];
     _controller = TabController(vsync: this, length: _allPages.length);
     _controller.addListener((){

@@ -23,10 +23,7 @@ class CompanyHome extends StatefulWidget {
   @override
   _CompanyHomeState createState() => _CompanyHomeState(utype: utype);
 }
-class _Page {
-  _Page({this.widget});
-  final StatelessWidget widget;
-}
+
 class _CompanyHomeState extends State<CompanyHome> {
   int utype;
   Map<String,dynamic> user;
@@ -351,7 +348,7 @@ class _CompanyHomeState extends State<CompanyHome> {
     );
     await Future.delayed(Duration(seconds: 1),()async{
       CompanyOperations comp=new CompanyOperations();
-      bool isDeleted=await comp.removeClip(sid:clip.soundId);
+      bool isDeleted=await comp.removeClip(sid:clip.soundId,uri:clip.clipUri);
       if(isDeleted){
          await getAllClips();
       }

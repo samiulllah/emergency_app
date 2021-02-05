@@ -2,7 +2,7 @@ class SoundClip{
    String soundId,clipUri,title,description,datetime,uid;
    bool playing,loading;
 
-   SoundClip({this.title,this.description,this.clipUri});
+   SoundClip({this.title,this.description,this.clipUri,this.playing=false});
    SoundClip.fromJson(Map<String, dynamic> json) {
       soundId = json['sid'];
       title = json['title'];

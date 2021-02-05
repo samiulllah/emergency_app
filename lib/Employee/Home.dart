@@ -1,6 +1,9 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:emergency_app/Models/SoundClip.dart';
+import 'package:emergency_app/Providers/EmployeeServies.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
 import 'package:sizer/sizer.dart';
 
 import '../Constants.dart';
@@ -10,26 +13,50 @@ class EmployeeHome extends StatefulWidget {
 }
 
 class _EmployeeHomeState extends State<EmployeeHome> {
-  List<SoundClip> soundClips=[];
+  AudioPlayer audioPlugin;
+
+  List<SoundClip> soundClips=new List<SoundClip>();
+  List<SoundClip> completeList=new List<SoundClip>();
+
+  TextEditingController searchController=new TextEditingController();
+  bool progress=true;
+  int playingIndex=-1;
+  Future<void> getAllClips() async {
+    EmployeeOperations emp=new EmployeeOperations();
+    List<SoundClip> clips=await emp.getAllClips();
+    setState(() {
+      soundClips=clips;
+      completeList=clips;
+      progress=false;
+    });
+  }
+  @override
+  void dispose(){
+    searchController.dispose();
+    audioPlugin.dispose();
+    super.dispose();
+  }
   @override
   void initState(){
+    searchController.addListener(() {
+      filterList(searchController.text);
+    });
+    audioPlugin= AudioPlayer();
+    getAllClips();
     super.initState();
-    soundClips.add(new SoundClip(title: "Fire",description: "When fire breaks out you'll listen this sound, Please memorize it"));
-    soundClips.add(new SoundClip(title: "Tornodo",description: "When there is tornodo out you'll listen this sound, Please memorize it"));
-    soundClips.add(new SoundClip(title: "Volcano Erruption",description: "When volcano errupts out you'll listen this sound, Please memorize it"));
-    soundClips.add(new SoundClip(title: "Earthquake",description: "When there is earthquake out you'll listen this sound, Please memorize it"));
   }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           resizeToAvoidBottomInset: false,
-          body:Container(
+          body:!progress?Container(
             child:Column(
               children: [
-                SizedBox(height: 5.0.h,),
-                Container(
+                if(completeList.length>0)SizedBox(height: 5.0.h,),
+                if(completeList.length>0)Container(
                   width: 90.0.w,
                   height: 7.0.h,
                   alignment: Alignment.center,
@@ -37,6 +64,7 @@ class _EmployeeHomeState extends State<EmployeeHome> {
                   child: TextField(
                     textAlignVertical: TextAlignVertical.center,
                     textAlign: TextAlign.left,
+                    controller: searchController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: new InputDecoration(
                         suffixIcon: Icon(Icons.search),
@@ -54,8 +82,20 @@ class _EmployeeHomeState extends State<EmployeeHome> {
                     ),
                   ),
                 ),
-                Expanded(child: listOfClips(context))
+                completeList.length>0?Expanded(child: listOfClips(context)):
+                Container(
+                    margin: EdgeInsets.only(top: 20),
+                    child: Center(child:Text("No alarm found")))
               ],
+            ),
+          ):Center(
+            child: NutsActivityIndicator(
+              radius: 20,
+              activeColor: Colors.indigo,
+              inactiveColor: Colors.red,
+              tickCount: 11,
+              startRatio: 0.55,
+              animationDuration: Duration(milliseconds: 123),
             ),
           ),
         )
@@ -141,5 +181,26 @@ class _EmployeeHomeState extends State<EmployeeHome> {
       ),
     );
     return list;
+  }
+  void filterList(String name){
+    List<SoundClip> clips=[];
+    if(name==""){
+      setState(() {
+        soundClips=completeList;
+      });
+    }
+    else {
+      String up=name[0].toString().toUpperCase()+name.substring(1,name.length);
+      String low=name[0].toString().toLowerCase()+name.substring(1,name.length);
+      print("Upper case $up and lower case $low");
+      for (SoundClip s in soundClips) {
+        if (s.title.contains(up) || s.title.contains(low)) {
+          clips.add(s);
+        }
+      }
+      setState(() {
+        soundClips = clips;
+      });
+    }
   }
 }

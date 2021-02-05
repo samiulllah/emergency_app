@@ -2,22 +2,21 @@ import 'package:emergency_app/Company/Administrators.dart';
 import 'package:emergency_app/Company/Main.dart';
 import 'package:emergency_app/Company/Profile.dart';
 import 'package:emergency_app/Constants.dart';
+import 'package:emergency_app/Employee/Profile.dart';
 import 'package:emergency_app/LoginScreen.dart';
 import 'package:emergency_app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sizer/sizer.dart';
 import 'package:emergency_app/Providers/SharedPref.dart';
-class CompanySettingScreen extends StatefulWidget {
-  int utype;
-  CompanySettingScreen({this.utype});
+class EmployeeSetting extends StatefulWidget {
   @override
-  _CompanySettingScreenState createState() => _CompanySettingScreenState(utype:utype);
+  _EmployeeSettingState createState() => _EmployeeSettingState();
 }
 
-class _CompanySettingScreenState extends State<CompanySettingScreen> {
-  int utype;
-  _CompanySettingScreenState({this.utype});
+class _EmployeeSettingState extends State<EmployeeSetting> {
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,13 +46,9 @@ class _CompanySettingScreenState extends State<CompanySettingScreen> {
               child: Center(child: Icon(Icons.settings,size: 25.0.w,color: Colors.white,)),
             ),
             SizedBox(height: 3.0.h,),
-            if(utype==0)settingItem(title:"Administrators",icon:Icon(Icons.people,size: 10.0.w,color: Constants.primary,),callback:(){
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (BuildContext context) => CompanyAdministrators()));
-            }),
             settingItem(title:"Profile",icon:Icon(Icons.person_sharp,size: 10.0.w,color: Constants.primary),callback:()async{
               Navigator.of(context).push(MaterialPageRoute(
-                  builder: (BuildContext context) => CompanyProfile(userType: utype)));
+                  builder: (BuildContext context) => EmployeeProfile()));
             }),
             settingItem(title:"About us",icon:Icon(Icons.contact_mail_outlined,size:10.0.w,color: Constants.primary),callback:(){
 
@@ -77,27 +72,27 @@ class _CompanySettingScreenState extends State<CompanySettingScreen> {
     );
   }
   Widget settingItem({String title,Icon icon,Function callback}){
-     return GestureDetector(
-       onTap: callback,
-       child: Container(
-         padding: EdgeInsets.only(top: 10,bottom: 10),
-         margin: EdgeInsets.only(top: 10),
-         decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-           color: Colors.white,
-         ),
-          child: Row(
-               children: [
-                   SizedBox(width: 3.0.w,),
-                   icon,
-                   SizedBox(width: 3.0.w,),
-                   Text(title,style: GoogleFonts.lato(fontSize: 16,fontWeight: FontWeight.bold),),
-                   Spacer(),
-                   Icon(Icons.arrow_forward_ios_sharp,color: Colors.blue),
-                   SizedBox(width: 3.0.w,),
-               ],
-          ),
-       ),
-     );
+    return GestureDetector(
+      onTap: callback,
+      child: Container(
+        padding: EdgeInsets.only(top: 10,bottom: 10),
+        margin: EdgeInsets.only(top: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          color: Colors.white,
+        ),
+        child: Row(
+          children: [
+            SizedBox(width: 3.0.w,),
+            icon,
+            SizedBox(width: 3.0.w,),
+            Text(title,style: GoogleFonts.lato(fontSize: 16,fontWeight: FontWeight.bold),),
+            Spacer(),
+            Icon(Icons.arrow_forward_ios_sharp,color: Colors.blue),
+            SizedBox(width: 3.0.w,),
+          ],
+        ),
+      ),
+    );
   }
 }

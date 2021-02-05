@@ -1,6 +1,7 @@
 import 'package:emergency_app/Constants.dart';
 import 'package:emergency_app/Employee/Home.dart';
 import 'package:emergency_app/Employee/Profile.dart';
+import 'package:emergency_app/Employee/Setting.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 class EmployeeMain extends StatefulWidget {
@@ -19,7 +20,7 @@ class _EmployeeMainState extends State<EmployeeMain> with SingleTickerProviderSt
   void initState(){
     _allPages= <_Page>[
       _Page(widget: EmployeeHome()),
-      _Page(widget: EmployeeProfile()),
+      _Page(widget: EmployeeSetting()),
     ];
     _controller = TabController(vsync: this, length: _allPages.length);
     _controller.addListener((){

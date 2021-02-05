@@ -52,7 +52,7 @@ class _CompanyAdministratorsState extends State<CompanyAdministrators> {
     return MaterialApp(
        home: Scaffold(
          body:Container(
-           child:Column(
+           child:!progress?Column(
              children: [
                completeList.length>0?SizedBox(height: 5.0.h,):Container(),
                completeList.length>0?Container(
@@ -81,22 +81,22 @@ class _CompanyAdministratorsState extends State<CompanyAdministrators> {
                    ),
                  ),
                ):Container(),
-               !progress?employees.length>0?listOfEmployees(context):
+               employees.length>0?listOfEmployees(context):
                Container(
                    margin: EdgeInsets.only(top: 20),
-                   child: Center(child:Text("No administrator found "))):
-               Center(
-                 child: NutsActivityIndicator(
-                   radius: 20,
-                   activeColor: Colors.indigo,
-                   inactiveColor: Colors.red,
-                   tickCount: 11,
-                   startRatio: 0.55,
-                   animationDuration: Duration(milliseconds: 123),
-                 ),
-               )
+                   child: Center(child:Text("No administrator found ")))
              ],
-           ),
+           ): Center(
+             child: NutsActivityIndicator(
+               radius: 20,
+               activeColor: Colors.indigo,
+               inactiveColor: Colors.red,
+               tickCount: 11,
+               startRatio: 0.55,
+               animationDuration: Duration(milliseconds: 123),
+             ),
+           )
+           ,
          ),
          floatingActionButton: FloatingActionButton(
            onPressed: (){
@@ -119,12 +119,33 @@ class _CompanyAdministratorsState extends State<CompanyAdministrators> {
       },
     );
   }
+  Widget showProfilePic(String avatar){
+    return CircleAvatar(
+      radius: 4.5.h,
+      child: CircleAvatar(
+        radius: 4.0.h,
+        backgroundImage: Image.network(avatar,width: 4.0.w,height: 4.0.h,fit: BoxFit.fill,
+          loadingBuilder:(BuildContext context, Widget child,ImageChunkEvent loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null ?
+                loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
+                    : null,
+              ),
+            );
+          },
+        ).image,
+      ),
+    );
+  }
   Widget adminItem(Employee emp){
     return Container(
-      margin: EdgeInsets.only(top: 20),
+      margin: EdgeInsets.only(top: 20,left:10,right: 10),
       child: Row(
         children: [
-          Icon(Icons.person_pin,size: 15.0.w,),
+          emp.avatar==null?Icon(Icons.person_pin,size: 15.0.w,):
+          showProfilePic(emp.avatar),
           SizedBox(width: 20,),
           SizedBox(
             width: 50.0.w,
@@ -223,38 +244,63 @@ class _CompanyAdministratorsState extends State<CompanyAdministrators> {
   detailPopup(BuildContext context,Employee emp)async{
     AlertDialog alert = AlertDialog(
       content: SizedBox(
-        height:25.0.h,
+        height:100.0.h/2,
         child:Expanded(
-          child: Row(
+          child: Column(
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Name",style: GoogleFonts.lato(fontSize: 14,fontWeight: FontWeight.bold),),
-                  SizedBox(height: 3.0.h,),
-                  Text("Email",style: GoogleFonts.lato(fontSize: 14,fontWeight: FontWeight.bold),),
-                  SizedBox(height: 3.0.h,),
-                  Text("Phone Number",style: GoogleFonts.lato(fontSize: 14,fontWeight: FontWeight.bold),),
-                  SizedBox(height: 3.0.h,),
-                  Text("Created on",style: GoogleFonts.lato(fontSize: 14,fontWeight: FontWeight.bold),),
-                ],
-              ),
-              SizedBox(width: 3.0.w,),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(emp.name,style:  GoogleFonts.lato(fontSize: 14),),
-                    SizedBox(height: 3.0.h,),
-                    Text(emp.email,style:  GoogleFonts.lato(fontSize: 14),),
-                    SizedBox(height: 3.0.h,),
-                    Text(emp.phoneNumber,style:  GoogleFonts.lato(fontSize: 14),),
-                    SizedBox(height: 3.0.h,),
-                    Flexible(child: Text(emp.joinedOn,style:  GoogleFonts.lato(fontSize: 14,),textAlign: TextAlign.left))
-                  ],
+              if(emp.avatar!=null)CircleAvatar(
+                radius: 10.5.h,
+                child: CircleAvatar(
+                  radius: 10.0.h,
+                  backgroundImage: Image.network(emp.avatar,width: 10.0.w,height: 10.0.h,fit: BoxFit.fill,
+                    loadingBuilder:(BuildContext context, Widget child,ImageChunkEvent loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null ?
+                          loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
+                              : null,
+                        ),
+                      );
+                    },
+                  ).image,
                 ),
-              )
-            ],
+              ),
+              if(emp.avatar!=null)SizedBox(height: 4.0.h,),
+              Expanded(
+                child: Row(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Name",style: GoogleFonts.lato(fontSize: 14,fontWeight: FontWeight.bold),),
+                      SizedBox(height: 3.0.h,),
+                      Text("Email",style: GoogleFonts.lato(fontSize: 14,fontWeight: FontWeight.bold),),
+                      SizedBox(height: 3.0.h,),
+                      Text("Phone Number",style: GoogleFonts.lato(fontSize: 14,fontWeight: FontWeight.bold),),
+                      SizedBox(height: 3.0.h,),
+                      Text("Created on",style: GoogleFonts.lato(fontSize: 14,fontWeight: FontWeight.bold),),
+                    ],
+                  ),
+                  SizedBox(width: 3.0.w,),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(emp.name,style:  GoogleFonts.lato(fontSize: 14),),
+                        SizedBox(height: 3.0.h,),
+                        Text(emp.email,style:  GoogleFonts.lato(fontSize: 14),),
+                        SizedBox(height: 3.0.h,),
+                        Text(emp.phoneNumber,style:  GoogleFonts.lato(fontSize: 14),),
+                        SizedBox(height: 3.0.h,),
+                        Flexible(child: Text(emp.joinedOn,style:  GoogleFonts.lato(fontSize: 14,),textAlign: TextAlign.left))
+                      ],
+                    ),
+                  )
+                ],
+            ),
+              ),
+           ]
           ),
         ),
       ),

@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'dart:io';
+import 'package:emergency_app/Providers/SharedPref.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:printing/printing.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -19,7 +22,7 @@ import 'package:printing/printing.dart';
 import '../Constants.dart';
 import 'Main.dart';
 import 'package:back_button_interceptor/back_button_interceptor.dart';
-
+import 'package:crypto/crypto.dart';
 class CompanyQr extends StatefulWidget {
   @override
   _CompanyQrState createState() => _CompanyQrState();
@@ -27,7 +30,26 @@ class CompanyQr extends StatefulWidget {
 
 class _CompanyQrState extends State<CompanyQr> {
   GlobalKey globalKey = new GlobalKey();
+  String digest;
+  bool loading=true;
   ScreenshotController screenshotController = ScreenshotController();
+  void generateDigest()async{
+    SharedPref sharedPref=new SharedPref();
+    Map<String,dynamic> user=await sharedPref.read("user");
+    String cid=await user['email'];
+    var bytes1 = utf8.encode(cid);
+    List<int> d = md5.convert(bytes1).bytes;
+    setState(() {
+       digest=d.toString();
+       loading=false;
+    });
+  }
+
+  @override
+  void initState(){
+    generateDigest();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -39,13 +61,20 @@ class _CompanyQrState extends State<CompanyQr> {
                  children: [
                    SizedBox(height: 10.0.h,),
                    Center(
-                     child: Screenshot(
+                     child: !loading?Screenshot(
                        controller: screenshotController,
                        child: QrImage(
-                         data: "1234567890",
+                         data: digest,
                          version: QrVersions.auto,
                          size: 250.0,
                        ),
+                     ):NutsActivityIndicator(
+                       radius: 20,
+                       activeColor: Colors.indigo,
+                       inactiveColor: Colors.red,
+                       tickCount: 11,
+                       startRatio: 0.55,
+                       animationDuration: Duration(milliseconds: 123),
                      ),
                    ),
                   SizedBox(height: 10.0.h,),
@@ -98,6 +127,10 @@ class QrPdf extends StatefulWidget {
 class _QrPdfState extends State<QrPdf> {
    String uri;
   _QrPdfState({this.uri});
+   @override
+   void initState(){
+     super.initState();
+   }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

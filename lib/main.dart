@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:emergency_app/Company/Home.dart';
 import 'package:emergency_app/Constants.dart';
 import 'package:emergency_app/Employee/Home.dart';
+import 'package:emergency_app/Employee/Main.dart';
 import 'package:emergency_app/LoginScreen.dart';
 import 'package:emergency_app/Providers/SharedPref.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -80,7 +81,7 @@ class _FlashScreenState extends State<FlashScreen> {
             }
             else {
               Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (BuildContext context) => EmployeeHome()));
+                  builder: (BuildContext context) => EmployeeMain()));
             }
 
           }

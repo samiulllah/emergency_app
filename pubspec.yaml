@@ -53,6 +53,9 @@ dependencies:
   nuts_activity_indicator: ^0.1.1
   flutter_spinkit: ^4.1.2+1
   image_picker: ^0.6.7+22
+  crypto: ^2.1.5
+  flutter_qr_bar_scanner: ^1.0.2
+  flutter_beep: ^0.2.0
 
 dev_dependencies:
   flutter_test:

@@ -8,6 +8,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'package:path/path.dart';
+import 'package:path/path.dart' as Path;
+
 class CompanyOperations{
 
 
@@ -26,7 +28,6 @@ class CompanyOperations{
           "CompanyEmail":email,
           "CompanyPhone":phone,
           "CompanyAddress":address,
-          "CompanyAvatar":userCredential.user.photoURL,
           "isPayed":"0",
           "Datetime":DateTime.now().toString()
         }
@@ -145,7 +146,7 @@ class CompanyOperations{
     }
   }
   // remove a clip
-  Future<bool> removeClip({String sid})async{
+  Future<bool> removeClip({String sid,String uri})async{
      bool isDelete=false;
      SharedPref sharedPref=new SharedPref();
      Map<String,dynamic> user=await sharedPref.read("user");
@@ -153,6 +154,7 @@ class CompanyOperations{
      QuerySnapshot snapshot=await FirebaseFirestore.instance.collection("CompanySounds").doc(email).collection("All").where("sid",isEqualTo: sid).get();
      if(snapshot.docs.length>0){
          String docRef=await snapshot.docs[0].reference.id.toString();
+         await deleteStorageFile(uri);
          await FirebaseFirestore.instance.collection("CompanySounds").doc(email).collection("All").
                                 doc(docRef).delete();
          isDelete=true;
@@ -277,25 +279,149 @@ class CompanyOperations{
     }
   }
   // update profile
-  Future<bool>  updateProfile({String name,String phone,String address,File img})async{
+  Future<bool>  updateCompanyProfile({String name,String phone,String address,File img,String avatar,String email,int userType})async{
     bool isUpdate=false;
-    if(img==null){
-      SharedPref sharedPref=new SharedPref();
-      Map<String,dynamic> user=await sharedPref.read("user");
-      if(user.containsKey("avatar")){
-        // already have avatar means update and delete previous
-
+    if(img!=null){
+      if(avatar==null){
+        // first time creation
+        bool isSaved=await uploadAndWrite(img: img,name: name,phone: phone,address: address);
+        return isSaved;
       }
       else{
-        // means first time creation of avatar
-
+        // already have avatar means update and delete previous
+         // deleting old
+        bool isDelete=await deleteStorageFile(avatar);
+        if(isDelete){
+          bool isSaved=await uploadAndWrite(img: img,name: name,phone: phone,address: address);
+          return isSaved;
+        }
+        else{
+          return false;
+        }
       }
     }
     else{
        // only text update
+      if(userType==0) { // company
 
+        QuerySnapshot snapshot = await FirebaseFirestore.instance.collection(
+            "CompanyRegistrations")
+            .where("CompanyEmail", isEqualTo: email).get();
+        if (snapshot.docs.length > 0) {
+          snapshot.docs[0].reference.update({
+            "CompanyName": name,
+            "CompanyPhone": phone,
+            "CompanyAddress": address,
+          });
+        }
+      }
+      else{  // admin
+
+        QuerySnapshot snapshot = await FirebaseFirestore.instance.collection(
+            "CompanyAdmins")
+            .where("email", isEqualTo: email).get();
+        if (snapshot.docs.length > 0) {
+          snapshot.docs[0].reference.update({
+            "name": name,
+            "phone": phone,
+          });
+        }
+      }
     }
     return isUpdate;
   }
-  // update pr
+  Future<bool> uploadAndWrite({File img,String email,String name,String phone,String address,int userType})async{
+    try {
+      FirebaseStorage storage = await FirebaseStorage.instance;
+      Reference reference = await storage.ref().child(
+          "Avatars/${basename(img.path)}${DateTime
+              .now()
+              .millisecondsSinceEpoch}");
+      // save to db
+      await reference.putFile(img).then((value) async {
+        String dwnUrl = await value.ref.getDownloadURL();
+        QuerySnapshot snapshot=await FirebaseFirestore.instance.collection("CompanyRegistrations")
+            .where("CompanyEmail",isEqualTo: email).get();
+        if(userType==0) {
+          if (snapshot.docs.length > 0) {
+            snapshot.docs[0].reference.update({
+              "CompanyName": name,
+              "CompanyPhone": phone,
+              "CompanyAddress": address,
+              "avatar": dwnUrl,
+            });
+          }
+        }
+        else{
+          QuerySnapshot snapshot = await FirebaseFirestore.instance.collection(
+              "CompanyAdmins")
+              .where("email", isEqualTo: email).get();
+          if (snapshot.docs.length > 0) {
+            snapshot.docs[0].reference.update({
+              "name": name,
+              "phone": phone,
+              "avatar": dwnUrl,
+            });
+          }
+        }
+      });
+      return true;
+    }
+    catch(e){
+       return false;
+    }
+  }
+  // delete file
+  Future<bool> deleteStorageFile(String uri)async{
+    try {
+      String fileUrl = uri;
+      var url = Uri.decodeFull(Path.basename(fileUrl)).replaceAll(
+          new RegExp(r'(\?alt).*'), '');
+
+      var firebaseStorageRef =
+      FirebaseStorage.instance.ref().child(url);
+      await firebaseStorageRef.delete();
+      return true;
+    }catch(e){
+      return false;
+    }
+  }
+  // fetch user profile
+  Future<Map<String,dynamic>>  fetchUser(String email,int userType)async{
+    Map<String,dynamic> response=new Map();
+    try{
+      if(userType==0){
+        // company
+        QuerySnapshot snapshot=await FirebaseFirestore.instance.collection("CompanyRegistrations").where("CompanyEmail",isEqualTo: email).get();
+        if(snapshot.docs.length>0){
+           response['name']=snapshot.docs[0].data()['CompanyName'];
+           response['phone']=snapshot.docs[0].data()['CompanyPhone'];
+           response['address']=snapshot.docs[0].data()['CompanyAddress'];
+           if(snapshot.docs[0].data().containsKey("avatar")){
+               if(snapshot.docs[0].data()['avatar']!=null){
+                 response['avatar']=snapshot.docs[0].data()['avatar'];
+               }
+           }
+        }
+      }
+      else{
+        // admin
+        QuerySnapshot snapshot=await FirebaseFirestore.instance.collection("CompanyAdmins").where("email",isEqualTo: email).get();
+        if(snapshot.docs.length>0){
+          response['name']=snapshot.docs[0].data()['name'];
+          response['phone']=snapshot.docs[0].data()['phone'];
+          response['address']=email;
+          if(snapshot.docs[0].data().containsKey("avatar")){
+            if(snapshot.docs[0].data()['avatar']!=null){
+              response['avatar']=snapshot.docs[0].data()['avatar'];
+            }
+          }
+        }
+      }
+    }
+    catch(e){
+
+    }
+    return response;
+  }
 }
