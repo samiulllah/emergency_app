@@ -45,6 +45,9 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
+        manifestPlaceholders = [onesignal_app_id: "bead113a-0024-4ffc-833b-75f1aff226ed",
+                                // Project number pulled from dashboard, local value is ignored.
+                                onesignal_google_project_number: "REMOTE"]
     }
 
     buildTypes {
@@ -67,3 +70,4 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.3'
 
 }
+apply plugin: 'com.onesignal.androidsdk.onesignal-gradle-plugin'

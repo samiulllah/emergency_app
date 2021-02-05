@@ -7,6 +7,7 @@ import 'package:emergency_app/Constants.dart';
 import 'package:emergency_app/Providers/SharedPref.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:sizer/sizer.dart';
 
 class CompanyMain extends StatefulWidget {
@@ -25,9 +26,59 @@ class _CompanyMainHomeState extends State<CompanyMain>  with SingleTickerProvide
   int selected=0;
   int utype;
   _CompanyMainHomeState({this.utype});
+  Future<void> initPlatformState(BuildContext context) async {
+    if (!mounted) return;
+
+    OneSignal.shared.setLogLevel(OSLogLevel.verbose, OSLogLevel.none);
+
+    OneSignal.shared.setRequiresUserPrivacyConsent(false);
+
+    var settings = {
+      OSiOSSettings.autoPrompt: false,
+      OSiOSSettings.promptBeforeOpeningPushUrl: true
+    };
+
+    OneSignal.shared.setNotificationReceivedHandler((OSNotification notification) {
+      // play the clip
+
+    });
+
+    OneSignal.shared
+        .setNotificationOpenedHandler((OSNotificationOpenedResult result) {
+
+    });
+
+    OneSignal.shared
+        .setInAppMessageClickedHandler((OSInAppMessageAction action) {
+
+    });
+
+    OneSignal.shared
+        .setSubscriptionObserver((OSSubscriptionStateChanges changes) {
+      print("SUBSCRIPTION STATE CHANGED: ${changes.jsonRepresentation()}");
+    });
+
+    OneSignal.shared.setPermissionObserver((OSPermissionStateChanges changes) {
+      print("PERMISSION STATE CHANGED: ${changes.jsonRepresentation()}");
+    });
+
+    OneSignal.shared.setEmailSubscriptionObserver(
+            (OSEmailSubscriptionStateChanges changes) {
+          print("EMAIL SUBSCRIPTION STATE CHANGED ${changes.jsonRepresentation()}");
+        });
+
+    await OneSignal.shared
+        .init("bead113a-0024-4ffc-833b-75f1aff226ed", iOSSettings: settings);
+
+    OneSignal.shared
+        .setInFocusDisplayType(OSNotificationDisplayType.notification);
+    var status = await OneSignal.shared.getPermissionSubscriptionState();
+
+  }
 
   @override
   void initState(){
+    initPlatformState(context);
     SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
     _allPages= <_Page>[
       _Page(widget: CompanyHome(utype: utype,)),

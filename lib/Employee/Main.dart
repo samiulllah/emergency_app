@@ -1,5 +1,4 @@
-import 'dart:html';
-
+import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:emergency_app/Constants.dart';
 import 'package:emergency_app/Employee/Home.dart';
@@ -26,7 +25,7 @@ class _EmployeeMainState extends State<EmployeeMain> with SingleTickerProviderSt
   String playerId;
   GlobalKey<NavigatorState> navigatorKey;
   bool _requireConsent = false;
-  AudioPlayer audioPlugin=AudioPlayer();
+  AudioPlayer audioPlugin;
   @override
   void initState(){
     _allPages= <_Page>[
@@ -59,13 +58,17 @@ class _EmployeeMainState extends State<EmployeeMain> with SingleTickerProviderSt
 
     OneSignal.shared.setNotificationReceivedHandler((OSNotification notification) {
        // play the clip
+        AudioPlayer audioPlugin=AudioPlayer();
         String url=notification.payload.additionalData['clipUrl'];
         audioPlugin.play(url);
+
     });
 
     OneSignal.shared
         .setNotificationOpenedHandler((OSNotificationOpenedResult result) {
-
+      AudioPlayer audioPlugin=AudioPlayer();
+      String url=result.notification.payload.additionalData['clipUrl'];
+      audioPlugin.play(url);
       showMessage(navigatorKey.currentContext,result.notification.payload.title,result.notification.payload.subtitle);
 
     });
@@ -95,7 +98,8 @@ class _EmployeeMainState extends State<EmployeeMain> with SingleTickerProviderSt
     OneSignal.shared
         .setInFocusDisplayType(OSNotificationDisplayType.notification);
     var status = await OneSignal.shared.getPermissionSubscriptionState();
-    playerId= status.subscriptionStatus.userId;
+    playerId= await status.subscriptionStatus.userId;
+    // print("player id ------> $playerId");
     EmployeeOperations empOp=new EmployeeOperations();
     await empOp.savePlayerId(playerId);
   }

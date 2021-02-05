@@ -14,9 +14,11 @@ class EmployeeOperations{
      SharedPref sharedPref=new SharedPref();
      Map<String,dynamic> user=await sharedPref.read("user");
      String cid=await user['cid'];
-     await FirebaseFirestore.instance.collection("EmployeeDevices").add({
+     String email=await user['email'];
+     await FirebaseFirestore.instance.collection("EmployeeDevices").doc(email).set({
        "cid":cid,
-       "playerId":pid
+       "playerId":pid,
+       "uid":email
      });
    }
    // getting hash list of emails
