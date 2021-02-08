@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path/path.dart' as Path;
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 class EmployeeOperations{
    // write save player id
    Future<void> savePlayerId(String pid)async{
@@ -259,5 +260,31 @@ class EmployeeOperations{
        clips.add(SoundClip.fromJson(snapshot.docs[i].data()));
      }
      return clips;
+   }
+   Future<List<String>> isImposed()async{
+     List<String> response=[];
+     final prefs = await SharedPreferences.getInstance();
+     String notification=prefs.getString("title");
+     if(notification!=null){
+       response.add("1");
+       response.add(prefs.getString("title"));
+       response.add(prefs.getString("body"));
+       response.add(prefs.getString("url"));
+     }
+     else{
+       response.add("0");
+     }
+     return response;
+   }
+   Future<bool> removeImpose()async{
+     try {
+       final prefs = await SharedPreferences.getInstance();
+       prefs.remove("title");
+       prefs.remove("body");
+       prefs.remove("url");
+       return true;
+     }catch(e){
+       return false;
+     }
    }
 }

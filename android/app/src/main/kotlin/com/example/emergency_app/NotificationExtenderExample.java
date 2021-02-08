@@ -6,12 +6,17 @@ import com.onesignal.NotificationExtenderService;
 import com.onesignal.OSNotificationReceivedResult;
 import java.math.BigInteger;
 
+import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
- public class NotificationExtenderExample extends NotificationExtenderService {
+import static android.webkit.ConsoleMessage.MessageLevel.LOG;
+
+public class NotificationExtenderExample extends NotificationExtenderService {
     @Override
     protected boolean onNotificationProcessing(OSNotificationReceivedResult receivedResult) {
         OverrideSettings overrideSettings = new OverrideSettings();
@@ -21,22 +26,32 @@ import androidx.core.app.NotificationCompat;
             @Override
             public NotificationCompat.Builder extend(NotificationCompat.Builder builder) {
                 //Force remove push from Notification Center after 30 seconds
-                builder.setTimeoutAfter(30000);
+//                builder.setTimeoutAfter(30000);
                 // Sets the icon accent color notification color to Green on Android 5.0+ devices.
-                builder.setColor(new BigInteger("FF00FF00", 16).intValue());
-                builder.setContentTitle("New Message");
-                builder.setContentText("New Encrypted Message");
+
+                builder.setColor(new BigInteger("FFed2202", 16).intValue());
+                builder.setContentTitle(receivedResult.payload.title);
+                builder.setContentText(receivedResult.payload.body);
+                builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
                 return builder;
             }
         };
 
         OSNotificationDisplayedResult displayedResult = displayNotification(overrideSettings);
-        Log.d("OneSignalExample", "Notification displayed with id: " + displayedResult.androidNotificationId);
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setAction(Intent.ACTION_RUN);
-        intent.putExtra("route", "/");
-        this.startActivity(intent);
-        // Return true to stop the notification from displaying.
+        try {
+
+            String url = receivedResult.payload.additionalData.getString("clipUrl");
+            Intent serviceIntent = new Intent(this, MyBroadcastReceiver.class);
+            serviceIntent.putExtra("title", receivedResult.payload.title);
+            serviceIntent.putExtra("body", receivedResult.payload.body);
+            serviceIntent.putExtra("url", url);
+            MyBroadcastReceiver.enqueueWork(this, serviceIntent);
+
+        }catch(Exception e){
+
+        }
+        
         return false;
     }
+
 }

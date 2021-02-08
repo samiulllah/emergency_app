@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:sizer/sizer.dart';
+import 'package:toast/toast.dart';
 import '../Constants.dart';
 
 class EmployeeRegistration extends StatefulWidget {
@@ -159,6 +160,10 @@ class _EmployeeRegistrationState extends State<EmployeeRegistration> {
                     child: Center(child: Text("Submit",style: GoogleFonts.breeSerif(fontSize: 14.0.sp,letterSpacing: .5,color: Colors.white),))
                 ),
                 onPressed: ()async{
+                  if(email.text=="" || password.text==""|| name.text==""|| phone.text==""){
+                    Toast.show("All field are required ! ", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+                    return;
+                  }
                   setState(() {
                     progress=true;
                   });

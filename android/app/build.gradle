@@ -35,6 +35,7 @@ android {
 
     lintOptions {
         disable 'InvalidPackage'
+        checkReleaseBuilds false
     }
 
     defaultConfig {
@@ -68,6 +69,8 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:26.4.0')
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.android.support:multidex:1.0.3'
+    implementation 'io.card:android-sdk:5.+'
+    implementation 'androidx.multidex:multidex:2.0.1'
 
 }
 apply plugin: 'com.onesignal.androidsdk.onesignal-gradle-plugin'

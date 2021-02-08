@@ -57,6 +57,9 @@ dependencies:
   flutter_qr_bar_scanner: ^1.0.2
   flutter_beep: ^0.2.0
   onesignal_flutter: ^2.6.2
+  wakelock: ^0.2.1+1
+  flutter_braintree: ^1.1.0
+  http: ^0.12.2
 
 dev_dependencies:
   flutter_test:

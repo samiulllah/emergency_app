@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:sizer/sizer.dart';
+import 'package:toast/toast.dart';
 
 import 'Company/RegistrationScreen.dart';
 import 'Providers/CompanyOperations.dart';
@@ -112,6 +113,10 @@ class _LoginScreenState extends State<LoginScreen> {
                        child: Center(child: Text("Submit",style: GoogleFonts.breeSerif(fontSize: 14.0.sp,letterSpacing: .5,color: Colors.white),))
                    ),
                    onPressed: ()async{
+                     if(email.text=="" || password.text==""){
+                       Toast.show("Please enter email and password ", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+                       return;
+                     }
                      //start progress
                      setState(() {
                        progress=true;
@@ -131,13 +136,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           // checking user type
                           if(done[2]=="0") {   // company
                             if (done[1] == "1") {
-                              // navigate admin to home
+                              // navigate company to home
                               Navigator.of(context).pushReplacement(MaterialPageRoute(
                                   builder: (BuildContext context) =>
                                       CompanyMain(utype: 0,)));
                             }
                             else {
-                              // navigate admin to payment screen
+                              // navigate company to payment screen
                               Navigator.of(context).pushReplacement(MaterialPageRoute(
                                   builder: (BuildContext context) =>
                                       PaymentScreen()));

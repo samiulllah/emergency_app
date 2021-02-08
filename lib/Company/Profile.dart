@@ -313,7 +313,7 @@ class _CompanyProfileState extends State<CompanyProfile> {
          Toast.show("Successfully  updated !", context, duration: Toast.LENGTH_LONG, gravity:  Toast.TOP);
       }
       else{
-        Toast.show("Failed to update!", context, duration: Toast.LENGTH_LONG, gravity:  Toast.TOP);
+
       }
     });
     Navigator.of(context, rootNavigator: true).pop();

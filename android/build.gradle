@@ -4,6 +4,13 @@ buildscript {
         google()
         jcenter()
         maven { url 'https://plugins.gradle.org/m2/' }
+        maven {
+            url "https://cardinalcommerce.bintray.com/android"
+            credentials {
+                username 'braintree-team-sdk@cardinalcommerce'
+                password '220cc9476025679c4e5c843666c27d97cfb0f951'
+            }
+        }
     }
 
     dependencies {
@@ -19,6 +26,13 @@ allprojects {
     repositories {
         google()
         jcenter()
+        maven {
+            url "https://cardinalcommerce.bintray.com/android"
+            credentials {
+                username 'braintree-team-sdk@cardinalcommerce'
+                password '220cc9476025679c4e5c843666c27d97cfb0f951'
+            }
+        }
     }
 }
 //classpath 'com.android.tools.build:gradle:3.5.0'

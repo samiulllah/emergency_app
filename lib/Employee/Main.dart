@@ -7,9 +7,11 @@ import 'package:emergency_app/Employee/Setting.dart';
 import 'package:emergency_app/Providers/EmployeeServies.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:sizer/sizer.dart';
+import 'package:wakelock/wakelock.dart';
 class EmployeeMain extends StatefulWidget {
   @override
   _EmployeeMainState createState() => _EmployeeMainState();
@@ -20,14 +22,37 @@ class _Page {
 }
 class _EmployeeMainState extends State<EmployeeMain> with SingleTickerProviderStateMixin {
   var _controller;
+  bool impose=false;
+  String title,desc;
   List<_Page> _allPages;
   int selected=0;
   String playerId;
   GlobalKey<NavigatorState> navigatorKey;
   bool _requireConsent = false;
   AudioPlayer audioPlugin;
+
+  void checkImposed()async{
+    EmployeeOperations empOps=new EmployeeOperations();
+    List<String> imposed=await empOps.isImposed();
+    if(imposed[0]=="1"){
+      title=imposed[1];
+      desc=imposed[2];
+      audioPlugin=AudioPlayer();
+      audioPlugin.play(imposed[3]);
+      audioPlugin.onPlayerCompletion.listen((event) {
+         if(impose=true){
+           audioPlugin.play(imposed[3]);
+         }
+      });
+      setState(() {
+        impose=true;
+      });
+    }
+  }
   @override
   void initState(){
+    Wakelock.enable();
+    checkImposed();
     _allPages= <_Page>[
       _Page(widget: EmployeeHome()),
       _Page(widget: EmployeeSetting()),
@@ -43,6 +68,7 @@ class _EmployeeMainState extends State<EmployeeMain> with SingleTickerProviderSt
     super.initState();
     navigatorKey = GlobalKey<NavigatorState>();
     initPlatformState(context);
+    Wakelock.disable();
   }
   Future<void> initPlatformState(BuildContext context) async {
     if (!mounted) return;
@@ -58,18 +84,10 @@ class _EmployeeMainState extends State<EmployeeMain> with SingleTickerProviderSt
 
     OneSignal.shared.setNotificationReceivedHandler((OSNotification notification) {
        // play the clip
-        AudioPlayer audioPlugin=AudioPlayer();
-        String url=notification.payload.additionalData['clipUrl'];
-        audioPlugin.play(url);
-
     });
 
     OneSignal.shared
         .setNotificationOpenedHandler((OSNotificationOpenedResult result) {
-      AudioPlayer audioPlugin=AudioPlayer();
-      String url=result.notification.payload.additionalData['clipUrl'];
-      audioPlugin.play(url);
-      showMessage(navigatorKey.currentContext,result.notification.payload.title,result.notification.payload.subtitle);
 
     });
 
@@ -109,7 +127,8 @@ class _EmployeeMainState extends State<EmployeeMain> with SingleTickerProviderSt
       key: navigatorKey,
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-          body: TabBarView(
+          backgroundColor: impose?Constants.primary:Colors.white,
+          body: !impose?TabBarView(
             controller: _controller,
             children: _allPages.map<Widget>((_Page page) {
               return SafeArea(
@@ -122,8 +141,9 @@ class _EmployeeMainState extends State<EmployeeMain> with SingleTickerProviderSt
                 ),
               );
             }).toList(),
+          ):Container(
           ),
-          bottomNavigationBar: BottomAppBar(
+          bottomNavigationBar: !impose?BottomAppBar(
             color: Colors.transparent,
             child: Container(
               height: 10.0.h,
@@ -159,8 +179,44 @@ class _EmployeeMainState extends State<EmployeeMain> with SingleTickerProviderSt
                 ],
               ),
             ),
-          )
+          ):buildImpose()
       ),
+    );
+  }
+  Widget buildImpose(){
+    return Container(
+         child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+                Center(child: Image.asset('assets/logo.png',width: 20.0.h,height: 20.0.h,fit: BoxFit.fill,)),
+                SizedBox(height: 5.0.h,),
+                Text(title,style: GoogleFonts.lato(fontSize: 34,fontWeight: FontWeight.bold,color: Colors.white,),),
+                SizedBox(height: 5.0.h,),
+                Text(desc,style: GoogleFonts.lato(fontSize: 24,fontWeight: FontWeight.bold,color: Colors.white,),),
+                SizedBox(height: 5.0.h,),
+                RaisedButton(
+                  color: Constants.secondary,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)
+                  ),
+                  child: Text("Okay",style: GoogleFonts.lato(fontSize:20,color: Colors.white,),),
+                  onPressed: ()async{
+                    // stop playing sound here and remove from prefs
+                    EmployeeOperations empOps=new EmployeeOperations();
+                    bool removeImpose=await empOps.removeImpose();
+                    if(removeImpose){
+                      setState(() {
+                          impose=false;
+                      });
+                      audioPlugin.stop();
+                      audioPlugin.dispose();
+                      audioPlugin=null;
+                    }
+                  },
+                )
+            ],
+         ),
     );
   }
   void showMessage(BuildContext context,String title,String desc)async{
