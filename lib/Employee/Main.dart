@@ -111,7 +111,7 @@ class _EmployeeMainState extends State<EmployeeMain> with SingleTickerProviderSt
         });
 
     await OneSignal.shared
-        .init("bead113a-0024-4ffc-833b-75f1aff226ed", iOSSettings: settings);
+        .init("26e26ada-7e93-4717-988c-4874386c9331", iOSSettings: settings);
 
     OneSignal.shared
         .setInFocusDisplayType(OSNotificationDisplayType.notification);
@@ -136,7 +136,6 @@ class _EmployeeMainState extends State<EmployeeMain> with SingleTickerProviderSt
                 bottom: false,
                 child: Container(
                     key: ObjectKey(page.widget),
-                    padding: const EdgeInsets.all(12.0),
                     child: page.widget
                 ),
               );

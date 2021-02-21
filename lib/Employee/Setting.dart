@@ -38,7 +38,10 @@ class _EmployeeSettingState extends State<EmployeeSetting> {
           children: [
             Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(20)),
+                borderRadius: BorderRadius.only(
+                   bottomLeft: Radius.circular(20),
+                   bottomRight: Radius.circular(20),
+                ),
                 color: Constants.primary,
               ),
               width: 100.0.w,
@@ -57,7 +60,7 @@ class _EmployeeSettingState extends State<EmployeeSetting> {
               SharedPref sharedPref=new SharedPref();
               await sharedPref.remove("user");
               Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (BuildContext context) => EmpOrAdmin(initialState: 1,)));
+                  builder: (BuildContext context) => EmpOrAdmin(initialState: 2,)));
             }),
             Expanded(
               child: Align(

@@ -56,6 +56,7 @@ class _CompanyQrState extends State<CompanyQr> {
        debugShowCheckedModeBanner: false,
        home: Scaffold(
           body: Container(
+              padding: EdgeInsets.all(12.0),
               child:Column(
                  crossAxisAlignment: CrossAxisAlignment.center,
                  children: [
@@ -135,6 +136,7 @@ class _QrPdfState extends State<QrPdf> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
+        backgroundColor: Constants.primary,
         body: Container(
           child: PdfPreview(
             build: (format) => _generatePdf(format, ""),

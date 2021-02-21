@@ -22,6 +22,7 @@ class _CompanySettingScreenState extends State<CompanySettingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(20)),
           color: Colors.white,
@@ -39,7 +40,10 @@ class _CompanySettingScreenState extends State<CompanySettingScreen> {
           children: [
             Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(20)),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20)
+                ),
                 color: Constants.primary,
               ),
               width: 100.0.w,
@@ -62,7 +66,7 @@ class _CompanySettingScreenState extends State<CompanySettingScreen> {
               SharedPref sharedPref=new SharedPref();
               await sharedPref.remove("user");
               Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (BuildContext context) => EmpOrAdmin(initialState: 1,)));
+                  builder: (BuildContext context) => EmpOrAdmin(initialState: 2,)));
             }),
             Expanded(
               child: Align(

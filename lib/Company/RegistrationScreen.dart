@@ -1,3 +1,4 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:emergency_app/Company/PaymentScreen.dart';
 import 'package:emergency_app/Providers/CompanyOperations.dart';
 import 'package:flutter/material.dart';
@@ -193,6 +194,14 @@ class _CompanyRegistrationState extends State<CompanyRegistration> {
                 onPressed: ()async{
                   if(companyName.text=="" || password.text==""|| companyAddress.text==""|| phoneNumber.text==""|| emailAddress.text==""){
                     Toast.show("All field are required ! ", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+                    return;
+                  }
+                  if(!EmailValidator.validate(emailAddress.text)){
+                    Toast.show("Please enter valid email address ! ", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+                    return;
+                  }
+                  if(password.text.length<8){
+                    Toast.show("Minimum length of password should be 8 digits ! ", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
                     return;
                   }
                   setState(() {

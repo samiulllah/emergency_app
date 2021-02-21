@@ -1,3 +1,4 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:emergency_app/Company/Main.dart';
 import 'package:emergency_app/Company/PaymentScreen.dart';
 import 'package:emergency_app/Constants.dart';
@@ -115,6 +116,14 @@ class _LoginScreenState extends State<LoginScreen> {
                    onPressed: ()async{
                      if(email.text=="" || password.text==""){
                        Toast.show("Please enter email and password ", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+                       return;
+                     }
+                     if(!EmailValidator.validate(email.text)){
+                       Toast.show("Please enter valid email address ! ", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+                       return;
+                     }
+                     if(password.text.length<8){
+                       Toast.show("Minimum length of password should be 8 digits ! ", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
                        return;
                      }
                      //start progress

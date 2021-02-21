@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:back_button_interceptor/back_button_interceptor.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:emergency_app/Models/Employee.dart';
 import 'package:emergency_app/Providers/CompanyOperations.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +55,21 @@ class _CompanyAdministratorsState extends State<CompanyAdministrators> {
          body:Container(
            child:!progress?Column(
              children: [
-               completeList.length>0?SizedBox(height: 5.0.h,):Container(),
+               SizedBox(height: 2.0.h,),
+               GestureDetector(
+                 onTap: (){
+                   Navigator.pop(context);
+                 },
+                 child: Row(
+                     mainAxisAlignment: MainAxisAlignment.start,
+                     children: [
+                       SizedBox(width: 10,),
+                       Icon(Icons.arrow_back,size: 20,),
+                       SizedBox(width: 5,),
+                       Text("Back")
+                     ]),
+               ),
+               completeList.length>0?SizedBox(height: 3.0.h,):Container(),
                completeList.length>0?Container(
                  width: 90.0.w,
                  height: 7.0.h,
@@ -120,22 +135,23 @@ class _CompanyAdministratorsState extends State<CompanyAdministrators> {
     );
   }
   Widget showProfilePic(String avatar){
-    return CircleAvatar(
-      radius: 4.5.h,
-      child: CircleAvatar(
-        radius: 4.0.h,
-        backgroundImage: Image.network(avatar,width: 4.0.w,height: 4.0.h,fit: BoxFit.fill,
-          loadingBuilder:(BuildContext context, Widget child,ImageChunkEvent loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Center(
-              child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null ?
-                loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
-                    : null,
-              ),
-            );
-          },
-        ).image,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10.0.h),
+      child: CachedNetworkImage(
+          fit: BoxFit.cover,
+          width: 8.0.h,
+          height: 8.0.h,
+          imageBuilder: (context, imageProvider) => Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: imageProvider,
+                fit: BoxFit.cover,),
+            ),
+          ),
+          progressIndicatorBuilder: (context, url, downloadProgress) =>
+              CircularProgressIndicator(value: downloadProgress.progress),
+          errorWidget: (context, url, error) => Icon(Icons.error),
+          imageUrl:avatar
       ),
     );
   }
@@ -251,18 +267,11 @@ class _CompanyAdministratorsState extends State<CompanyAdministrators> {
               if(emp.avatar!=null)CircleAvatar(
                 radius: 10.5.h,
                 child: CircleAvatar(
+                  backgroundColor: Colors.transparent,
                   radius: 10.0.h,
-                  backgroundImage: Image.network(emp.avatar,width: 10.0.w,height: 10.0.h,fit: BoxFit.fill,
-                    loadingBuilder:(BuildContext context, Widget child,ImageChunkEvent loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null ?
-                          loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
-                              : null,
-                        ),
-                      );
-                    },
+                  backgroundImage: FadeInImage.assetNetwork(
+                    placeholder: 'assets/user.png',
+                    image: emp.avatar,
                   ).image,
                 ),
               ),
@@ -405,6 +414,10 @@ class _createAdminState extends State<createAdmin> {
             !progress?DialogButton(
               color: Constants.primary,
               onPressed: () async {
+                if(name.text==""||password.text==""||email.text==""||phone.text==""){
+                  Toast.show("Sorry all fields are required", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
+                  return;
+                }
                 CompanyOperations company=new CompanyOperations();
                // start progress
                 setState(() {

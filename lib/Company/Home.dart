@@ -69,6 +69,7 @@ class _CompanyHomeState extends State<CompanyHome> {
        home: Scaffold(
          resizeToAvoidBottomInset: false,
          body:Container(
+           padding: cup.EdgeInsets.all(12.0),
            child:Column(
              mainAxisAlignment: !progress?MainAxisAlignment.start:cup.MainAxisAlignment.center,
              children: [
@@ -489,6 +490,10 @@ class _UploadState extends State<Upload> {
             !progress?DialogButton(
               color: Constants.primary,
               onPressed: () async {
+                if(title.text==""||description.text==""|| audioFile==null){
+                  Toast.show("Sorry all fields are required", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
+                  return;
+                }
                 // let upload
                 setState(() {
                   progress=true;
@@ -497,7 +502,7 @@ class _UploadState extends State<Upload> {
                 bool upload=await company.saveClip(title: title.text,description: description.text,file: audioFile);
                 if(upload) {
                   // after successful upload
-                  Toast.show("Successfully uploaded!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.TOP);
+                  Toast.show("Successfully uploaded!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
                   title.text = "";
                   description.text = "";
                   setState(() {
@@ -507,7 +512,7 @@ class _UploadState extends State<Upload> {
                   Navigator.of(context).pop();
                 }
                 else{
-                  Toast.show("Failed to upload!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.TOP);
+                  Toast.show("Failed to upload!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
                 }
               },
               child: Text(

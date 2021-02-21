@@ -12,6 +12,7 @@ import 'package:sizer/sizer.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:toast/toast.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CompanyProfile extends StatefulWidget {
   int userType;
@@ -102,10 +103,30 @@ class _CompanyProfileState extends State<CompanyProfile> {
         home: Scaffold(
           resizeToAvoidBottomPadding: false,
           body: Container(
+            padding: EdgeInsets.all(15),
               child:!progress? Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    SizedBox(height: 2.0.h,),
+                    GestureDetector(
+                      onTap: ()async{
+                        if(isChanged()) {
+                          await showMessage(context);
+                        }
+                        else{
+                           Navigator.pop(context);
+                        }
+                      },
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(width: 10,),
+                            Icon(Icons.arrow_back,size: 20,),
+                            SizedBox(width: 5,),
+                            Text("Back")
+                          ]),
+                    ),
                       SizedBox(height: 10.0.h,),
                       // showing image
                       _image==null?avatar!=null?
@@ -198,7 +219,12 @@ class _CompanyProfileState extends State<CompanyProfile> {
                        ),
                        child: Text("Go Back",style: GoogleFonts.lato(color: Colors.white,),),
                        onPressed: ()async{
-                          Navigator.of(context).pop();
+                         if(isChanged()) {
+                           await showMessage(context);
+                         }else{
+                           Navigator.pop(context);
+                         }
+                         // Navigator.of(context).pop();
                        },
                     )
                   ],
@@ -218,7 +244,32 @@ class _CompanyProfileState extends State<CompanyProfile> {
   }
 
   Widget showProfilePic(){
-   return GestureDetector(
+    return  GestureDetector(
+      onTap: (){
+        getImage();
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10.0.h),
+        child: CachedNetworkImage(
+            fit: BoxFit.cover,
+            width: 15.5.h,
+            height: 15.5.h,
+            imageBuilder: (context, imageProvider) => Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.cover,),
+              ),
+            ),
+            progressIndicatorBuilder: (context, url, downloadProgress) =>
+                CircularProgressIndicator(value: downloadProgress.progress),
+            errorWidget: (context, url, error) => Icon(Icons.error),
+            imageUrl:avatar
+        ),
+      ),
+    );
+
+    return GestureDetector(
       onTap: (){
         getImage();
       },
@@ -226,17 +277,10 @@ class _CompanyProfileState extends State<CompanyProfile> {
         radius: 10.5.h,
         child: CircleAvatar(
           radius: 10.0.h,
-          backgroundImage: Image.network(avatar,width: 20.0.w,height: 20.0.h,fit: BoxFit.fill,
-            loadingBuilder:(BuildContext context, Widget child,ImageChunkEvent loadingProgress) {
-              if (loadingProgress == null) return child;
-              return Center(
-                child: CircularProgressIndicator(
-                  value: loadingProgress.expectedTotalBytes != null ?
-                  loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
-                      : null,
-                ),
-              );
-            },
+          backgroundColor: Colors.transparent,
+          backgroundImage: FadeInImage.assetNetwork(
+            placeholder: 'assets/user.png',
+            image: avatar,
           ).image,
         ),
       ),

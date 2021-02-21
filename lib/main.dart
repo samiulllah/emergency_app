@@ -10,6 +10,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sizer/sizer.dart';
 
@@ -50,56 +51,61 @@ class FlashScreen extends StatefulWidget {
 }
 
 class _FlashScreenState extends State<FlashScreen> {
+  bool w=false;
+  void checkConfigs()async{
+    // bool v=false;
+    Timer( Duration(seconds: 2),
+        ()async{
+      SharedPref sharedPref = new SharedPref();
+      Map<String, dynamic> user = await sharedPref.read("user");
+      // await sharedPref.remove("user");
+      if (user != null) {
+        int userType = int.parse(user["type"]); // 0 for company 1 for employee
+        // check if current user logged in nav to home
+        // check user type and navigate appropriately
+        if (userType == 0) {
+          if (user['isPayed'] == "1") {
+            // navigate admin to home
+            Navigator.of(context).pushReplacement(MaterialPageRoute(
+                builder: (BuildContext context) =>
+                    CompanyMain(utype: userType,)));
+          }
+          else {
+            // navigate admin to payment screen
+            Navigator.of(context).pushReplacement(MaterialPageRoute(
+                builder: (BuildContext context) => PaymentScreen()));
+          }
+        }
+        else if (userType == 1) {
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (BuildContext context) =>
+                  CompanyMain(utype: userType,)));
+        }
+        else {
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (BuildContext context) => EmployeeMain()));
+        }
+      }
+      else {
+        //not login nav to continue as company, administrator or employee.
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (BuildContext context) => EmpOrAdmin(initialState: 0,)));
+      }
+    }
+    );
+  }
   @override
   void initState() {
     SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
-    Timer( Duration(seconds: 6),
-            () async{
-        // bool v=false;
-          SharedPref sharedPref=new SharedPref();
-         Map<String,dynamic> user=await sharedPref.read("user");
-         // await sharedPref.remove("user");
-          if(user!=null) {
-            int userType = int.parse(user["type"]); // 0 for company 1 for employee
-            // check if current user logged in nav to home
-            // check user type and navigate appropriately
-            if (userType == 0) {
-              if(user['isPayed']=="1"){
-                // navigate admin to home
-                Navigator.of(context).pushReplacement(MaterialPageRoute(
-                    builder: (BuildContext context) => CompanyMain(utype: userType,)));
-              }
-              else{
-                // navigate admin to payment screen
-                Navigator.of(context).pushReplacement(MaterialPageRoute(
-                    builder: (BuildContext context) => PaymentScreen()));
-              }
-            }
-            else if(userType==1){
-              Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (BuildContext context) => CompanyMain(utype: userType,)));
-            }
-            else {
-              Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (BuildContext context) => EmployeeMain()));
-            }
-
-          }
-          else {
-            //not login nav to continue as company, administrator or employee.
-            Navigator.of(context).pushReplacement(MaterialPageRoute(
-                builder: (BuildContext context) => EmpOrAdmin(initialState: 0,)));
-          }
-        }
-    );
     super.initState();
+    checkConfigs();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Constants.primary,
-      body: Column(
+      body: w?Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(height: 20.0.h,),
@@ -117,6 +123,9 @@ class _FlashScreenState extends State<FlashScreen> {
             ),
             SizedBox(height: 15.0.h,),
           ],
+      ):SpinKitFadingFour(
+        color: Colors.white,
+        size: 60,
       ),
     );
   }

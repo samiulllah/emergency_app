@@ -1,3 +1,4 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:emergency_app/Employee/Main.dart';
 import 'package:emergency_app/Providers/EmployeeServies.dart';
 import 'package:flutter/material.dart';
@@ -162,6 +163,14 @@ class _EmployeeRegistrationState extends State<EmployeeRegistration> {
                 onPressed: ()async{
                   if(email.text=="" || password.text==""|| name.text==""|| phone.text==""){
                     Toast.show("All field are required ! ", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+                    return;
+                  }
+                  if(!EmailValidator.validate(email.text)){
+                    Toast.show("Please enter valid email address ! ", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+                    return;
+                  }
+                  if(password.text.length<8){
+                    Toast.show("Minimum length of password should be 8 digits ! ", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
                     return;
                   }
                   setState(() {

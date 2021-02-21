@@ -54,6 +54,7 @@ class _EmployeeHomeState extends State<EmployeeHome> {
         home: Scaffold(
           resizeToAvoidBottomInset: false,
           body:!progress?Container(
+            padding: EdgeInsets.all(15),
             child:Column(
               children: [
                 if(completeList.length>0)SizedBox(height: 5.0.h,),

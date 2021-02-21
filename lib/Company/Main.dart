@@ -68,8 +68,8 @@ class _CompanyMainHomeState extends State<CompanyMain>  with SingleTickerProvide
         });
 
     await OneSignal.shared
-        .init("bead113a-0024-4ffc-833b-75f1aff226ed", iOSSettings: settings);
-
+        .init("26e26ada-7e93-4717-988c-4874386c9331", iOSSettings: settings);
+  
     OneSignal.shared
         .setInFocusDisplayType(OSNotificationDisplayType.notification);
     var status = await OneSignal.shared.getPermissionSubscriptionState();
@@ -82,7 +82,7 @@ class _CompanyMainHomeState extends State<CompanyMain>  with SingleTickerProvide
     SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
     _allPages= <_Page>[
       _Page(widget: CompanyHome(utype: utype,)),
-      _Page(widget: CompanyEmployees()),
+      if(utype==0)_Page(widget: CompanyEmployees()),
       _Page(widget: CompanyQr()),
       _Page(widget: CompanySettingScreen(utype: utype,))
     ];
@@ -108,7 +108,6 @@ class _CompanyMainHomeState extends State<CompanyMain>  with SingleTickerProvide
                 bottom: false,
                 child: Container(
                     key: ObjectKey(page.widget),
-                    padding: const EdgeInsets.all(12.0),
                     child: page.widget
                 ),
               );
@@ -148,8 +147,17 @@ class _CompanyMainHomeState extends State<CompanyMain>  with SingleTickerProvide
                       }
                  ),
                  IconButton(
-                      icon: Icon(Icons.qr_code,color: selected==2?Colors.greenAccent:Colors.white,size: 5.0.h),
-                      onPressed: () {
+                      icon: utype==0?Icon(Icons.qr_code,color: selected==2?Colors.greenAccent:Colors.white,size: 5.0.h)
+                          :Icon(Icons.qr_code,color: selected==1?Colors.greenAccent:Colors.white,size: 5.0.h),
+
+                     onPressed: () {
+                        if(utype!=0){
+                          _controller.index=1;
+                          setState(() {
+                            selected=1;
+                          });
+                          return;
+                        }
                         _controller.index=2;
                         setState(() {
                           selected=2;
@@ -157,8 +165,17 @@ class _CompanyMainHomeState extends State<CompanyMain>  with SingleTickerProvide
                       }
                 ),
                   IconButton(
-                    icon: Icon(Icons.person_pin,color: selected==3?Colors.greenAccent:Colors.white,size: 5.0.h),
+                    icon: utype==0?Icon(Icons.person_pin,color: selected==3?Colors.greenAccent:Colors.white,size: 5.0.h):
+                    Icon(Icons.person_pin,color: selected==2?Colors.greenAccent:Colors.white,size: 5.0.h),
                     onPressed: () {
+
+                      if(utype!=0){
+                        _controller.index=2;
+                        setState(() {
+                          selected=2;
+                        });
+                        return;
+                      }
                       _controller.index=3;
                       setState(() {
                         selected=3;

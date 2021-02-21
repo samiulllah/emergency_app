@@ -30,7 +30,7 @@ dependencies:
   cupertino_icons: ^1.0.0
   sizer: ^1.1.8
   google_fonts: ^1.1.2
-  flutter_credit_card: ^0.1.4
+#  flutter_credit_card: ^0.1.4
   rflutter_alert: ^1.1.0
   qr_flutter: ^3.1.0
   share: ^0.6.5+4
@@ -45,7 +45,7 @@ dependencies:
   firebase_auth: ^0.20.0+1
   shared_preferences: ^0.5.12+4
   http_auth: ^0.3.1
-  webview_flutter: ^1.0.7
+ # webview_flutter: ^1.0.7
   file_picker: ^2.1.6
   firebase_storage: ^7.0.0
   toast: ^0.1.5
@@ -54,19 +54,27 @@ dependencies:
   flutter_spinkit: ^4.1.2+1
   image_picker: ^0.6.7+22
   crypto: ^2.1.5
-  flutter_qr_bar_scanner: ^1.0.2
+ # flutter_qr_bar_scanner: ^1.0.2
+  flutter_barcode_scanner: ^1.0.2
   flutter_beep: ^0.2.0
   onesignal_flutter: ^2.6.2
   wakelock: ^0.2.1+1
   flutter_braintree: ^1.1.0
   http: ^0.12.2
+  email_validator: ^1.0.5
+  #cached_network_image: ^2.5.0
 
 dev_dependencies:
+  flutter_native_splash: ^0.2.10
   flutter_test:
     sdk: flutter
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+flutter_native_splash:
+  color: "#e53641"
+  image: assets/logo.png
+  fullscreen: true
 
 # The following section is specific to Flutter.
 flutter:

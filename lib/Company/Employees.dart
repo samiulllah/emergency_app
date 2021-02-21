@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:emergency_app/Models/Employee.dart';
 import 'package:emergency_app/Providers/CompanyOperations.dart';
 import 'package:flutter/material.dart';
@@ -49,6 +50,7 @@ class _CompanyEmployeesState extends State<CompanyEmployees> {
           resizeToAvoidBottomInset: false,
           body:!progress?SingleChildScrollView(
             child: Container(
+              padding: EdgeInsets.all(12.0),
               child:Column(
                 children: [
                   completeList.length>0?SizedBox(height: 5.0.h,):Container(),
@@ -161,22 +163,23 @@ class _CompanyEmployeesState extends State<CompanyEmployees> {
     );
   }
   Widget showProfilePic(String avatar){
-    return CircleAvatar(
-      radius: 4.5.h,
-      child: CircleAvatar(
-        radius: 4.0.h,
-        backgroundImage: Image.network(avatar,width: 4.0.w,height: 4.0.h,fit: BoxFit.fill,
-          loadingBuilder:(BuildContext context, Widget child,ImageChunkEvent loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Center(
-              child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null ?
-                loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
-                    : null,
-              ),
-            );
-          },
-        ).image,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10.0.h),
+      child: CachedNetworkImage(
+          fit: BoxFit.cover,
+          width: 8.0.h,
+          height: 8.0.h,
+          imageBuilder: (context, imageProvider) => Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: imageProvider,
+                fit: BoxFit.cover,),
+            ),
+          ),
+          progressIndicatorBuilder: (context, url, downloadProgress) =>
+              CircularProgressIndicator(value: downloadProgress.progress),
+          errorWidget: (context, url, error) => Icon(Icons.error),
+          imageUrl:avatar
       ),
     );
   }
