@@ -12,7 +12,7 @@ import 'package:sizer/sizer.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:toast/toast.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 
 class CompanyProfile extends StatefulWidget {
   int userType;
@@ -248,23 +248,14 @@ class _CompanyProfileState extends State<CompanyProfile> {
       onTap: (){
         getImage();
       },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10.0.h),
-        child: CachedNetworkImage(
-            fit: BoxFit.cover,
-            width: 15.5.h,
-            height: 15.5.h,
-            imageBuilder: (context, imageProvider) => Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: imageProvider,
-                    fit: BoxFit.cover,),
-              ),
-            ),
-            progressIndicatorBuilder: (context, url, downloadProgress) =>
-                CircularProgressIndicator(value: downloadProgress.progress),
-            errorWidget: (context, url, error) => Icon(Icons.error),
-            imageUrl:avatar
+      child: CircleAvatar(
+        backgroundColor: Colors.transparent,
+        radius: 8.0.h,
+        backgroundImage: Image.asset('assets/loading.gif').image,
+        child: CircleAvatar(
+          radius: 8.0.h,
+          backgroundColor: Colors.transparent,
+          backgroundImage: NetworkImage(avatar),
         ),
       ),
     );

@@ -38,7 +38,6 @@ dependencies:
   path_provider: ^1.6.27
   screenshot: ^0.2.0
   back_button_interceptor: ^4.4.1
-  qr_code_scanner: ^0.3.0
   flutter_signin_button: ^1.1.0
   cloud_firestore: ^0.16.0
   firebase_core: ^0.7.0
@@ -55,7 +54,9 @@ dependencies:
   image_picker: ^0.6.7+22
   crypto: ^2.1.5
  # flutter_qr_bar_scanner: ^1.0.2
-  flutter_barcode_scanner: ^1.0.2
+  #flutter_barcode_scanner: ^1.0.2
+ # fast_qr_reader_view: any
+  qr_code_scanner: ^0.3.5
   flutter_beep: ^0.2.0
   onesignal_flutter: ^2.6.2
   wakelock: ^0.2.1+1

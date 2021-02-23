@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.mattperiera.emergency_app">
+    package="com.mattperiera.emergencyapp">
     <uses-permission android:name="android.permission.INTERNET"/>
    <application
         android:label="Emergency"
@@ -57,7 +57,7 @@
                <action android:name="android.intent.action.VIEW" />
                <category android:name="android.intent.category.DEFAULT" />
                <category android:name="android.intent.category.BROWSABLE" />
-               <data android:scheme="com.example.emergencyapp.braintree" />
+               <data android:scheme="com.mattperiera.emergencyapp.braintree" />
            </intent-filter>
        </activity>
 

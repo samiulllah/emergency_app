@@ -76,6 +76,42 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:146646381470:android:7e83f4e6e055dc1456dc8f",
+        "android_client_info": {
+          "package_name": "com.mattperiera.emergencyapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "146646381470-3fplvfb92tgvjvoct2uu7p4qel4dqkaa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKejVLZ0pijYc3YYsv_q0QOFJ3X0eMf7o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "146646381470-3fplvfb92tgvjvoct2uu7p4qel4dqkaa.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "146646381470-2caund23qdoggrqgr0pvelccmtdbpfin.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.emergencyApp"
+              }
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"

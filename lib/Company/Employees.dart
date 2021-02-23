@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:emergency_app/Models/Employee.dart';
 import 'package:emergency_app/Providers/CompanyOperations.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
 import 'package:sizer/sizer.dart';
 import '../Constants.dart';
-
+import 'package:flutter/painting.dart';
 class CompanyEmployees extends StatefulWidget {
   @override
   _CompanyEmployeesState createState() => _CompanyEmployeesState();
@@ -163,23 +163,14 @@ class _CompanyEmployeesState extends State<CompanyEmployees> {
     );
   }
   Widget showProfilePic(String avatar){
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10.0.h),
-      child: CachedNetworkImage(
-          fit: BoxFit.cover,
-          width: 8.0.h,
-          height: 8.0.h,
-          imageBuilder: (context, imageProvider) => Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: imageProvider,
-                fit: BoxFit.cover,),
-            ),
-          ),
-          progressIndicatorBuilder: (context, url, downloadProgress) =>
-              CircularProgressIndicator(value: downloadProgress.progress),
-          errorWidget: (context, url, error) => Icon(Icons.error),
-          imageUrl:avatar
+    return  CircleAvatar(
+      backgroundColor: Colors.transparent,
+      radius: 30,
+      backgroundImage: Image.asset('assets/loading.gif').image,
+      child: CircleAvatar(
+        radius: 30,
+        backgroundColor: Colors.transparent,
+        backgroundImage: NetworkImage(avatar),
       ),
     );
   }
@@ -327,3 +318,5 @@ class _CompanyEmployeesState extends State<CompanyEmployees> {
   }
 
 }
+
+

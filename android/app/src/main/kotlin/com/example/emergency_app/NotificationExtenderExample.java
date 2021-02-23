@@ -1,4 +1,4 @@
-package com.mattperiera.emergency_app;
+package com.mattperiera.emergencyapp;
 
 import com.onesignal.OSNotificationDisplayedResult;
 import com.onesignal.OSNotificationPayload;

@@ -1,4 +1,4 @@
-package com.mattperiera.emergency_app;
+package com.mattperiera.emergencyapp;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

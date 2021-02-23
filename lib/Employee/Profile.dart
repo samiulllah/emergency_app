@@ -1,5 +1,4 @@
 import 'package:back_button_interceptor/back_button_interceptor.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:emergency_app/Providers/EmployeeServies.dart';
 import 'package:emergency_app/Providers/SharedPref.dart';
 import 'package:flutter/material.dart';
@@ -121,20 +120,6 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                           Text("Back")
                         ]),
                   ),
-                  SizedBox(height: 2.0.h,),
-                  GestureDetector(
-                    onTap: (){
-                      Navigator.pop(context);
-                    },
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          SizedBox(width: 10,),
-                          Icon(Icons.arrow_back,size: 20,),
-                          SizedBox(width: 5,),
-                          Text("Back")
-                        ]),
-                  ),
                   SizedBox(height: 10.0.h,),
                   // showing image
                   _image==null?avatar!=null?
@@ -228,25 +213,16 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
       onTap: (){
         getImage();
       },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10.0.h),
-        child: CachedNetworkImage(
-            fit: BoxFit.cover,
-            width: 15.0.h,
-            height: 15.0.h,
-            imageBuilder: (context, imageProvider) => Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: imageProvider,
-                  fit: BoxFit.cover,),
-              ),
-            ),
-            progressIndicatorBuilder: (context, url, downloadProgress) =>
-                CircularProgressIndicator(value: downloadProgress.progress),
-            errorWidget: (context, url, error) => Icon(Icons.error),
-            imageUrl:avatar
+      child: CircleAvatar(
+        backgroundColor: Colors.transparent,
+        radius: 8.0.h,
+        backgroundImage: Image.asset('assets/loading.gif').image,
+        child: CircleAvatar(
+          radius: 8.0.h,
+          backgroundColor: Colors.transparent,
+          backgroundImage: NetworkImage(avatar),
         ),
-      ),
+      )
     );
   }
   void showMessage(BuildContext context)async{
