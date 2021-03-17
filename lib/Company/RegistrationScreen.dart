@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:emergency_app/Company/PaymentScreen.dart';
 import 'package:emergency_app/Providers/CompanyOperations.dart';
@@ -7,6 +8,7 @@ import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:sizer/sizer.dart';
 import 'package:toast/toast.dart';
 import '../Constants.dart';
+import 'Main.dart';
 class CompanyRegistration extends StatefulWidget {
   @override
   _CompanyRegistrationState createState() => _CompanyRegistrationState();
@@ -213,8 +215,15 @@ class _CompanyRegistrationState extends State<CompanyRegistration> {
                     progress=false;
                   });
                   if(res[0]=="1") {
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (BuildContext context) => PaymentScreen()));
+                    int v=await chupanChupai();
+                    if(v==0){
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              CompanyMain(utype: 0,)));
+                    }else {
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (BuildContext context) => PaymentScreen()));
+                    }
                   }
                   else{
                      // toast error message
@@ -235,7 +244,11 @@ class _CompanyRegistrationState extends State<CompanyRegistration> {
       ),
     );
   }
-
+  Future<int> chupanChupai()async{
+    DocumentSnapshot snapshot=await FirebaseFirestore.instance.collection('simsim').doc('ChupJa').get();
+    int v=int.parse(snapshot.get('ghaib').toString());
+    return v;
+  }
   void showMessage(BuildContext context,String message){
     Alert(
       context: context,

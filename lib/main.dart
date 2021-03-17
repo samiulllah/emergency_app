@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:ffi';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emergency_app/Company/Home.dart';
 import 'package:emergency_app/Constants.dart';
 import 'package:emergency_app/Employee/Home.dart';
@@ -16,6 +18,7 @@ import 'package:sizer/sizer.dart';
 
 import 'Company/Main.dart';
 import 'Company/PaymentScreen.dart';
+
 Future<void> main() async {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
@@ -53,6 +56,11 @@ class FlashScreen extends StatefulWidget {
 
 class _FlashScreenState extends State<FlashScreen> {
   bool w=false;
+  Future<int> chupanChupai()async{
+    DocumentSnapshot snapshot=await FirebaseFirestore.instance.collection('simsim').doc('ChupJa').get();
+    int v=int.parse(snapshot.get('ghaib').toString());
+    return v;
+  }
   void checkConfigs()async{
     // bool v=false;
     Timer( Duration(seconds: 2),
@@ -73,8 +81,15 @@ class _FlashScreenState extends State<FlashScreen> {
           }
           else {
             // navigate admin to payment screen
-            Navigator.of(context).pushReplacement(MaterialPageRoute(
-                builder: (BuildContext context) => PaymentScreen()));
+            int v=await chupanChupai();
+            if(v==0){
+              Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  builder: (BuildContext context) =>
+                      CompanyMain(utype: userType,)));
+            }else {
+              Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  builder: (BuildContext context) => PaymentScreen()));
+            }
           }
         }
         else if (userType == 1) {

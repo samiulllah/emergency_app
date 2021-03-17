@@ -63,6 +63,7 @@ dependencies:
   flutter_braintree: ^1.1.0
   http: ^0.12.2
   email_validator: ^1.0.5
+  credit_card_input_form: ^2.2.0
   #cached_network_image: ^2.5.0
 
 dev_dependencies:

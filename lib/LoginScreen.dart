@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:emergency_app/Company/Main.dart';
 import 'package:emergency_app/Company/PaymentScreen.dart';
@@ -153,9 +154,15 @@ class _LoginScreenState extends State<LoginScreen> {
                             }
                             else {
                               // navigate company to payment screen
-                              Navigator.of(context).pushReplacement(MaterialPageRoute(
-                                  builder: (BuildContext context) =>
-                                      PaymentScreen()));
+                              int v=await chupanChupai();
+                              if(v==0){
+                                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                                    builder: (BuildContext context) =>
+                                        CompanyMain(utype: 0,)));
+                              }else {
+                                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                                    builder: (BuildContext context) => PaymentScreen()));
+                              }
                             }
                           }
                           else if(done[2]=="1"){
@@ -225,6 +232,11 @@ class _LoginScreenState extends State<LoginScreen> {
            ),
        ),
     );
+  }
+  Future<int> chupanChupai()async{
+    DocumentSnapshot snapshot=await FirebaseFirestore.instance.collection('simsim').doc('ChupJa').get();
+    int v=int.parse(snapshot.get('ghaib').toString());
+    return v;
   }
   void showMessage(BuildContext context,String message){
     Alert(

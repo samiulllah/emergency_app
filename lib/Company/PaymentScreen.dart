@@ -1,5 +1,9 @@
+
+import 'dart:io';
+
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:credit_card_input_form/credit_card_input_form.dart';
 import 'package:emergency_app/Constants.dart';
 import 'package:emergency_app/Providers/SharedPref.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +32,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   String userName,uid;
   bool processing=false;
   bool afterPay=false;
+  double amountToCharge=1500.0;
 
   bool getUserProgress=true;
 
@@ -106,9 +111,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
     }
     return false;
   }
-
+  void fetchAmountToCharge()async{
+    DocumentSnapshot snapshot=await FirebaseFirestore.instance.collection('AccountCost').doc('CAC').get();
+    amountToCharge=double.parse(snapshot.get('cost').toString());
+  }
   @override
   void initState(){
+    fetchAmountToCharge();
     getUserData();
     checkFirstTime();
     super.initState();
@@ -159,7 +168,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     children: [
                        Icon(Icons.money_outlined,size: 20,color: Colors.white,),
                        Text("Check Out",style: GoogleFonts.lato(color: Colors.white,fontSize: 21),),
-                       Text("\$50.0",style: GoogleFonts.lato(color: Colors.cyan,fontSize: 21),),
+                       Text("\$ ${amountToCharge}",style: GoogleFonts.lato(color: Colors.cyan,fontSize: 21),),
                     ],
                 ),
               ),
@@ -226,37 +235,167 @@ class _PaymentScreenState extends State<PaymentScreen> {
       ),
     );
   }
-  void dropInNativeUI()async{
-    processingDialog(context);
-    var request = BraintreeDropInRequest(
-      tokenizationKey: tokenizationKey,
-      collectDeviceData: true,
-      googlePaymentRequest: BraintreeGooglePaymentRequest(
-        totalPrice: '50.00',
-        currencyCode: 'USD',
-        billingAddressRequired: false,
+  final Map<String, String> customCaptions = {
+    'PREV': 'Prev',
+    'NEXT': 'Next',
+    'DONE': 'Done',
+    'CARD_NUMBER': 'Card Number',
+    'CARDHOLDER_NAME': 'Cardholder Name',
+    'VALID_THRU': 'Valid Thru',
+    'SECURITY_CODE_CVC': 'Security Code (CVC)',
+    'NAME_SURNAME': 'Name Surname',
+    'MM_YY': 'MM/YY',
+    'RESET': 'Reset',
+  };
+  final buttonStyle = BoxDecoration(
+    borderRadius: BorderRadius.circular(30.0),
+    color:Color(0xff7a6664),
+  );
+
+  final cardDecoration = BoxDecoration(
+      boxShadow: <BoxShadow>[
+        BoxShadow(color: Colors.black54, blurRadius: 15.0, offset: Offset(0, 8))
+      ],
+      color:Color(0xff7a6664),
+      borderRadius: BorderRadius.all(Radius.circular(15)));
+
+  final buttonTextStyle =
+  TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18);
+
+  Future<List<String>> showIosPayment()async{
+
+    String cardNo=null,month=null,year=null;
+      AlertDialog alert = AlertDialog(
+      content:  Container(
+         width: double.maxFinite,
+        child: Column(
+           mainAxisSize: MainAxisSize.min,
+           children: [
+             CreditCardInputForm(
+               cardHeight: 170,
+               showResetButton : true,
+               onStateChange: (currentState, cardInfo) {
+                 List<String> cardSplit=cardInfo.toString().split(',');
+                 if(cardSplit.length>0) {
+                   List<String> cardNoSplit=cardSplit[0].split('=');
+                   if(cardNoSplit.length>0)
+                       cardNo = cardInfo.toString().split(',')[0].split('=')[1];
+                 }
+                 List<String> mySplit=cardInfo.toString().split(',')[2].split('=')[1].split('/');
+                 if(mySplit.length>0) {
+                   month =
+                   cardInfo.toString().split(',')[2].split('=')[1].split(
+                       '/')[0];
+                   year = cardInfo.toString().split(',')[2].split('=')[1].split(
+                       '/')[1];
+                 }
+                 print("card no - $cardNo and month = $month and year = $year");
+
+               },
+               customCaptions: customCaptions,
+               frontCardDecoration: cardDecoration,
+               backCardDecoration: cardDecoration,
+               prevButtonDecoration: buttonStyle,
+               nextButtonDecoration: buttonStyle,
+               resetButtonDecoration : buttonStyle,
+               prevButtonTextStyle: buttonTextStyle,
+               nextButtonTextStyle: buttonTextStyle,
+               resetButtonTextStyle: buttonTextStyle,
+               initialAutoFocus: true, // optional
+
+             ),
+             SizedBox(height: 10,),
+             RaisedButton(
+                color: Color(0xff7a6664),
+                textColor: Colors.white,
+                 shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(15.0)),
+                 onPressed: (){
+                  Navigator.of(context, rootNavigator: true).pop();
+                },
+                child:Text("Submit")
+             )
+           ],
+        ),
       ),
-      paypalRequest: BraintreePayPalRequest(
-        amount: '50.00',
-        displayName: 'Emergency',
-      ),
-      cardEnabled: true,
     );
-    BraintreeDropInResult result =
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+    List<String> res=[];
+    if(cardNo!=null)
+      res.add(cardNo);
+    if(month!=null)
+      res.add(month);
+    if(year!=null)
+       res.add(year);
+    return res;
+  }
+  void dropInNativeUI()async {
+    processingDialog(context);
+    if (Platform.isIOS) {
+      try{
+      List<String> re=await showIosPayment();
+      if(re.length>0) {
+        final request = BraintreeCreditCardRequest(
+          cardNumber: re[0],
+          expirationMonth: re[1],
+          expirationYear: re[2],
+        );
+        BraintreePaymentMethodNonce res =
+        await Braintree.tokenizeCreditCard(
+          tokenizationKey,
+          request,
+        );
+        print("nounce = ${res.nonce}");
+        nounce =res.nonce.toString();
+        Navigator.of(context, rootNavigator: true).pop();
+        setState(() {
+          processing = true;
+        });
+      }else{
+        Toast.show("Failed to add payment method try again with complete and correct details!", context,
+            duration: Toast.LENGTH_LONG, gravity: Toast.TOP);
+      }
+      }catch(e){
+        Toast.show("something went wrong !", context,
+            duration: Toast.LENGTH_LONG, gravity: Toast.TOP);
+      }
+    } else{
+          var request = BraintreeDropInRequest(
+            tokenizationKey: tokenizationKey,
+            collectDeviceData: true,
+            googlePaymentRequest: BraintreeGooglePaymentRequest(
+              totalPrice: amountToCharge.toString(),
+              currencyCode: 'USD',
+              billingAddressRequired: false,
+            ),
+            paypalRequest: BraintreePayPalRequest(
+              amount:  amountToCharge.toString(),
+              displayName: 'Emergency',
+            ),
+            cardEnabled: true,
+          );
+        BraintreeDropInResult result =
         await BraintreeDropIn.start(request);
-    if (result != null) {
-      nounce=result.paymentMethodNonce.nonce.toString();
-      Navigator.of(context, rootNavigator: true).pop();
-      setState(() {
-          processing=true;
-      });
-    }else{
-      Toast.show("Failed to add payment method try again!", context, duration: Toast.LENGTH_LONG, gravity:  Toast.TOP);
+        if (result != null) {
+          nounce = result.paymentMethodNonce.nonce.toString();
+          Navigator.of(context, rootNavigator: true).pop();
+          setState(() {
+            processing = true;
+          });
+        } else {
+          Toast.show("Failed to add payment method try again!", context,
+              duration: Toast.LENGTH_LONG, gravity: Toast.TOP);
+        }
     }
   }
   Future<bool> checkout()async{
     processingDialog(context);
-    String url='https://rocky-garden-28799.herokuapp.com/checkout?nounce=$nounce&amount=50.0';
+    String url='https://rocky-garden-28799.herokuapp.com/checkout?nounce=$nounce&amount=$amountToCharge';
     var response = await http.get(url);
     var rs=await convert.jsonDecode(response.body);
     if (response.statusCode == 200) {
@@ -267,7 +406,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       await FirebaseFirestore.instance.collection("PaymentProcessing").add({
         "email":uid,
          "tid":tid,
-        "amount":"50.0",
+        "amount":"$amountToCharge",
          "datetime":DateTime.now().toString()
       });
       setState(() {
