@@ -35,6 +35,7 @@ class MyApp extends StatelessWidget {
           //initialize SizerUtil()
           SizerUtil().init(constraints, orientation); //initialize SizerUtil
           return MaterialApp(
+            debugShowCheckedModeBanner: false,
             theme: ThemeData(
               primarySwatch: Colors.blue,
             ),

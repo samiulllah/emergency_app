@@ -49,6 +49,7 @@ class _CompanyAdministratorsState extends State<CompanyAdministrators> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
        home: Scaffold(
          body:Container(
            child:!progress?Column(

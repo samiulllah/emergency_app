@@ -8,7 +8,7 @@ import Braintree
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
 
-    BTAppSwitch.setReturnURLScheme("com.mathew.emergency.braintree")
+    BTAppSwitch.setReturnURLScheme("com.priera.emergency.braintree")
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }

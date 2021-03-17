@@ -101,7 +101,7 @@ class _CompanyProfileState extends State<CompanyProfile> {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-          resizeToAvoidBottomPadding: false,
+          resizeToAvoidBottomInset: false,
           body: Container(
             padding: EdgeInsets.all(15),
               child:!progress? Column(

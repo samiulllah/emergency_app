@@ -38,6 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
        home: Scaffold(
            backgroundColor: Constants.primary,
            body: SingleChildScrollView(

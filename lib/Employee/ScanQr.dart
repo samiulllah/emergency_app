@@ -46,6 +46,7 @@ class _ScanQrState extends State<ScanQr> {
   void initState() {
     super.initState();
     _scanCode();
+    
   }
 
   @override

@@ -9,7 +9,7 @@ import 'package:flutter_braintree/flutter_braintree.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
+
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 import 'package:toast/toast.dart';

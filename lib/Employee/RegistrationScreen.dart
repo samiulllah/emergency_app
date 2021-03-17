@@ -31,6 +31,7 @@ class _EmployeeRegistrationState extends State<EmployeeRegistration> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: Constants.primary,
         body: SingleChildScrollView(

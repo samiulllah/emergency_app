@@ -40,14 +40,14 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>App need to access your location</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>App need to access your location</string>
 	<key>NSAppleMusicUsageDescription</key>
 	<string>App need to access mp3 file of alert sound</string>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access to scan QR codes</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>App need to access your location</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>App need to access your location</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>In order to update profile picture we need this permission</string>
 	<key>NSPhotoLibraryUsageDescription</key>
